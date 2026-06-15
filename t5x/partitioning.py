@@ -80,7 +80,11 @@ def bounds_from_last_device(last_device: jax.Device) -> HardwareMesh:
   # Must be passed the device at the highest-coordinate corner of the
   # relevant mesh, which is a requirement we know is satisfied by the last
   # device in jax.devices().
-  if hasattr(last_device, 'coords') and len(last_device.coords) == 3:
+  if (
+      hasattr(last_device, 'coords')
+      and len(last_device.coords) == 3
+      and hasattr(last_device, 'core_on_chip')
+  ):
     x, y, z = last_device.coords
     return x + 1, y + 1, z + 1, last_device.core_on_chip + 1
   else:
@@ -91,7 +95,7 @@ def bounds_from_last_device(last_device: jax.Device) -> HardwareMesh:
 
 def get_coords(device: jax.Device) -> HardwareMesh:
   """Returns the coordinates of the given device."""
-  if hasattr(device, 'coords'):
+  if hasattr(device, 'coords') and hasattr(device, 'core_on_chip'):
     return (*device.coords, device.core_on_chip)
   return (device.process_index, device.id % jax.local_device_count())
 
