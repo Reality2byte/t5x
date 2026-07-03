@@ -183,7 +183,7 @@ def config_with_fiddle(
   # Best effort to ensure that config and function match, even if the json
   # defines a different alias to the same module, like __main__ ~= t5x.train.
   if (config.__fn_or_cls__.__qualname__ != function.__qualname__) or (
-      inspect.getsource(config_module) != inspect.getsource(function_module)
+      inspect.getsource(config_module) != inspect.getsource(function_module)  # pyrefly: ignore[bad-argument-type]
   ):
 
     def module_and_name(fn: Callable[..., T]) -> str:

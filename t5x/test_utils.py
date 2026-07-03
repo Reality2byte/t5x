@@ -127,9 +127,9 @@ def make_train_state_base(
 ) -> train_state_lib.TrainState:
   """Helper to construct a train state for testing."""
   optimizer = optimizers.Optimizer(
-      flax_optimizer_def,
+      flax_optimizer_def,  # pyrefly: ignore[bad-argument-type]
       state=optimizers.OptimizerState(  # pytype: disable=wrong-arg-types  # jax-ndarray
-          step=step, param_states=param_states
+          step=step, param_states=param_states  # pyrefly: ignore[bad-argument-type]
       ),
       target=params,
   )
@@ -148,7 +148,7 @@ def make_train_state_replicated(
       global_input_shape
   )
   train_state = make_train_state_base(
-      step=np.int32(step),
+      step=np.int32(step),  # pyrefly: ignore[bad-argument-type]
       params={'bias': bias * 2, 'kernel': kernel * 2},
       param_states={  # only cast targets (above)
           'bias': bias.astype(np.float32),
@@ -362,7 +362,7 @@ class FakePartitioner(partitioning.BasePartitioner):
     super().__init__(num_partitions=1)
     self._global_mesh = mesh
     self._mesh_axes = mesh_axes
-    self._local_chunker = partitioning.LocalChunker(self.mesh)
+    self._local_chunker = partitioning.LocalChunker(self.mesh)  # pyrefly: ignore[bad-assignment]
     self._params_on_devices = params_on_devices
 
   def get_data_layout(self, batch_size=None, host_index=None):
@@ -378,7 +378,7 @@ class FakePartitioner(partitioning.BasePartitioner):
     return self._global_mesh
 
   @property
-  def params_on_devices(self):
+  def params_on_devices(self):  # pyrefly: ignore[bad-override]
     return self._params_on_devices
 
   def move_params_to_devices(self, train_state, train_state_axes):

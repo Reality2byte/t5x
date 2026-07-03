@@ -372,7 +372,7 @@ class EncoderDecoderModel(BaseTransformerModel):
       input_vocabulary: seqio.Vocabulary,
       output_vocabulary: seqio.Vocabulary,
       optimizer_def: optimizers.OptimizerDefType,
-      decode_fn: DecodeFnCallable = decoding.beam_search,
+      decode_fn: DecodeFnCallable = decoding.beam_search,  # pyrefly: ignore[bad-function-definition]
       feature_converter_cls: Optional[
           Callable[..., seqio.FeatureConverter]
       ] = None,
@@ -466,7 +466,7 @@ class EncoderDecoderModel(BaseTransformerModel):
     rngs = {'dropout': dropout_rng} if dropout_rng is not None else None
     if other_variables is None:
       other_variables = {}
-    return self.module.apply(
+    return self.module.apply(  # pyrefly: ignore[bad-return]
         {'params': params, **other_variables},
         batch['encoder_input_tokens'],
         batch['decoder_input_tokens'],
@@ -587,7 +587,7 @@ class EncoderDecoderModel(BaseTransformerModel):
       batch: Mapping[str, jnp.ndarray],
       rng: Optional[jax.Array] = None,
       decoder_params: Optional[MutableMapping[str, Any]] = None,
-      return_all_decodes: bool = None,
+      return_all_decodes: bool = None,  # pyrefly: ignore[bad-function-definition]
       num_decodes: int = None,  # pytype:disable=annotation-type-mismatch
       prompt_with_targets: bool = False,
   ) -> Tuple[jnp.ndarray, Mapping[str, jnp.ndarray]]:
@@ -687,7 +687,7 @@ class EncoderDecoderModel(BaseTransformerModel):
       prefill_decoder_prompt = True
     cache, initial_index = self._compute_kv_cache(
         params,
-        encoded_inputs=encoded_inputs,
+        encoded_inputs=encoded_inputs,  # pyrefly: ignore[bad-argument-type]
         encoder_input_tokens=encoder_input_tokens,
         decoder_input_tokens=decoder_prompt_inputs,
         prefill_decoder_prompt=prefill_decoder_prompt,
@@ -705,7 +705,7 @@ class EncoderDecoderModel(BaseTransformerModel):
         params=params,
         # [batch * num_decodes, input_len, emb_dim]
         encoded_inputs=decoding.flat_batch_beam_expand(
-            encoded_inputs, num_decodes
+            encoded_inputs, num_decodes  # pyrefly: ignore[bad-argument-type]
         ),
         # [batch * num_decodes, input_len]
         raw_inputs=decoding.flat_batch_beam_expand(
@@ -740,7 +740,7 @@ class EncoderDecoderModel(BaseTransformerModel):
 
     if 'eos_id' not in decoder_params:
       decoder_params['eos_id'] = self.output_vocabulary.eos_id or 1
-    decodes, scores = self._decode_fn(
+    decodes, scores = self._decode_fn(  # pyrefly: ignore[not-callable]
         inputs=decoder_prompt_inputs,
         cache=cache,
         tokens_to_logits=tokens_ids_to_logits,
@@ -795,19 +795,19 @@ class EncoderDecoderModel(BaseTransformerModel):
         -losses.cross_entropy_with_logits(
             logits,
             common_utils.onehot(
-                target_tokens, logits.shape[-1], on_value=1, off_value=0
+                target_tokens, logits.shape[-1], on_value=1, off_value=0  # pyrefly: ignore[missing-attribute]
             ),
             z_loss=0.0,
         )[0]
         * weights
     )
     if return_intermediates:
-      intermediates['decoder']['token_scores'] = (token_scores,)
+      intermediates['decoder']['token_scores'] = (token_scores,)  # pyrefly: ignore[unbound-name]
 
     sequence_scores = token_scores.sum(-1)
 
     if return_intermediates:
-      return sequence_scores, intermediates
+      return sequence_scores, intermediates  # pyrefly: ignore[unbound-name]
 
     return sequence_scores
 
@@ -833,7 +833,7 @@ class DecoderOnlyModel(BaseTransformerModel):
       module: nn.Module,
       vocabulary: seqio.Vocabulary,
       optimizer_def: optimizers.OptimizerDefType,
-      decode_fn: DecodeFnCallable = decoding.temperature_sample,
+      decode_fn: DecodeFnCallable = decoding.temperature_sample,  # pyrefly: ignore[bad-function-definition]
       inputs_bidirectional_attention: bool = False,
       feature_converter_cls: Optional[
           Callable[..., seqio.FeatureConverter]
@@ -904,7 +904,7 @@ class DecoderOnlyModel(BaseTransformerModel):
     if other_variables is None:
       other_variables = {}
 
-    return self.module.apply(
+    return self.module.apply(  # pyrefly: ignore[bad-return]
         {'params': params, **other_variables},
         batch['decoder_input_tokens'],
         batch['decoder_target_tokens'],
@@ -994,7 +994,7 @@ class DecoderOnlyModel(BaseTransformerModel):
         * weights
     )
     if return_intermediates:
-      intermediates['decoder']['token_scores'] = (token_scores,)
+      intermediates['decoder']['token_scores'] = (token_scores,)  # pyrefly: ignore[unbound-name]
 
     sequence_scores = token_scores.sum(-1)
 
@@ -1220,7 +1220,7 @@ class DecoderOnlyModel(BaseTransformerModel):
 
     if 'eos_id' not in decoder_params:
       decoder_params['eos_id'] = self.output_vocabulary.eos_id or 1
-    decoded_sequences, scores = self._decode_fn(
+    decoded_sequences, scores = self._decode_fn(  # pyrefly: ignore[not-callable]
         inputs=inputs,
         cache=prefilled_cache,
         tokens_to_logits=tokens_ids_to_logits,
@@ -1405,30 +1405,30 @@ def compute_base_metrics(
       ),
       'loss': metrics_lib.AveragePerStep(total=loss),
       'loss_per_nonpadding_target_token': clu_metrics.Average(
-          total=loss, count=nonpadding_tokens
+          total=loss, count=nonpadding_tokens  # pyrefly: ignore[bad-argument-type]
       ),
       'loss_per_all_target_tokens': clu_metrics.Average(
           total=loss, count=num_tokens
       ),
       'timing/seqs_per_second': metrics_lib.TimeRate.from_model_output(  # pytype: disable=wrong-arg-types  # jnp-type
-          numerator=num_examples
+          numerator=num_examples  # pyrefly: ignore[bad-argument-type]
       ),
       'timing/steps_per_second': metrics_lib.StepsPerTime.from_model_output(),
       'timing/seconds': metrics_lib.Time(),
       'timing/seqs': metrics_lib.Sum(num_examples),
       'timing/seqs_per_second_per_core': metrics_lib.TimeRate.from_model_output(  # pytype: disable=wrong-arg-types  # jnp-type
-          numerator=num_examples / num_devices
+          numerator=num_examples / num_devices  # pyrefly: ignore[bad-argument-type]
       ),
       'timing/target_tokens_per_second': metrics_lib.TimeRate.from_model_output(  # pytype: disable=wrong-arg-types  # jnp-type
-          numerator=num_tokens
+          numerator=num_tokens  # pyrefly: ignore[bad-argument-type]
       ),
       'timing/target_tokens_per_second_per_core': (
           metrics_lib.TimeRate.from_model_output(  # pytype: disable=wrong-arg-types  # jnp-type
-              numerator=num_tokens / num_devices
+              numerator=num_tokens / num_devices  # pyrefly: ignore[bad-argument-type]
           )
       ),
       'non_padding_fraction/loss_weights': clu_metrics.Average(
-          total=nonpadding_tokens, count=num_tokens
+          total=nonpadding_tokens, count=num_tokens  # pyrefly: ignore[bad-argument-type]
       ),
   }
   if z_loss is not None:

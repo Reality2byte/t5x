@@ -59,7 +59,7 @@ class Sum(clu_metrics.Metric):
   total: Scalar
 
   @classmethod
-  def from_model_output(cls, values: Scalar, **_) -> clu_metrics.Metric:
+  def from_model_output(cls, values: Scalar, **_) -> clu_metrics.Metric:  # pyrefly: ignore[bad-override]
     """Initializes a Sum Metric from array (or singular) values.
 
     Args:
@@ -92,7 +92,7 @@ class Step(clu_metrics.Metric):
   steps: Optional[int] = 1
 
   def replace_steps(self, steps: int) -> "Step":
-    return self.replace(steps=steps)
+    return self.replace(steps=steps)  # pyrefly: ignore[missing-attribute]
 
   def compute(self) -> jnp.ndarray:
     if self.steps is None:
@@ -111,7 +111,7 @@ class AveragePerStep(Step):
   total: Optional[Scalar] = None
 
   @classmethod
-  def from_model_output(cls,
+  def from_model_output(cls,  # pyrefly: ignore[bad-override]
                         values: Scalar,
                         steps: Optional[int] = 1,
                         **_) -> clu_metrics.Metric:
@@ -132,13 +132,13 @@ class AveragePerStep(Step):
   def merge(self, other: "AveragePerStep") -> "AveragePerStep":
     assert type(self) is type(other)
     return type(self)(
-        total=self.total + other.total, steps=self.steps + other.steps)
+        total=self.total + other.total, steps=self.steps + other.steps)  # pyrefly: ignore[unsupported-operation]
 
   def compute(self) -> jnp.ndarray:
     steps = super().compute()
     if self.total is None:
       raise ValueError("`AveragePerStep` `total` cannot be None.")
-    return self.total / steps
+    return self.total / steps  # pyrefly: ignore[bad-return]
 
 
 @flax.struct.dataclass
@@ -176,7 +176,7 @@ class Time(clu_metrics.Metric):
     Returns:
       A new Time object.
     """
-    return self.replace(duration=duration)
+    return self.replace(duration=duration)  # pyrefly: ignore[missing-attribute]
 
 
 @flax.struct.dataclass
@@ -194,7 +194,7 @@ class TimeRate(Time):
   numerator: Optional[jnp.ndarray] = None
 
   @classmethod
-  def from_model_output(cls, numerator: float, **_) -> clu_metrics.Metric:
+  def from_model_output(cls, numerator: float, **_) -> clu_metrics.Metric:  # pyrefly: ignore[bad-override]
     """Initializes a TimeRate Metric from a float value (the numerator).
 
     Args:
@@ -205,14 +205,14 @@ class TimeRate(Time):
     """
     return cls(numerator=numerator)  # pytype: disable=wrong-arg-types  # jax-ndarray
 
-  def merge(self, other: "TimeRate") -> "TimeRate":
+  def merge(self, other: "TimeRate") -> "TimeRate":  # pyrefly: ignore[bad-override]
     assert_msg = "Merging with non-None durations is currently not supported."
     assert self.duration is None and other.duration is None, assert_msg
-    return type(self)(numerator=self.numerator + other.numerator)
+    return type(self)(numerator=self.numerator + other.numerator)  # pyrefly: ignore[unsupported-operation]
 
   def compute(self) -> jnp.ndarray:
     duration = super().compute()
-    return self.numerator / duration
+    return self.numerator / duration  # pyrefly: ignore[unsupported-operation]
 
 
 @flax.struct.dataclass
@@ -223,7 +223,7 @@ class StepsPerTime(Step, Time):
   """
 
   @classmethod
-  def from_model_output(cls,
+  def from_model_output(cls,  # pyrefly: ignore[bad-override]
                         steps: Optional[int] = 1,
                         **_) -> clu_metrics.Metric:
     """Initializes an StepsPerTime Metric.
@@ -236,9 +236,9 @@ class StepsPerTime(Step, Time):
     """
     return cls(steps=steps)
 
-  def merge(self, other: "StepsPerTime") -> "StepsPerTime":
+  def merge(self, other: "StepsPerTime") -> "StepsPerTime":  # pyrefly: ignore[bad-override]
     assert type(self) is type(other)
-    return type(self)(steps=self.steps + other.steps)
+    return type(self)(steps=self.steps + other.steps)  # pyrefly: ignore[unsupported-operation]
 
   def compute(self) -> jnp.ndarray:
     steps = Step.compute(self)

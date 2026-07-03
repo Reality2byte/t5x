@@ -548,7 +548,7 @@ class Checkpointer(object):
       ] = None,
       *,
       keep: Optional[int] = None,
-      save_dtype: jnp.dtype = np.float32,
+      save_dtype: jnp.dtype = np.float32,  # pyrefly: ignore[bad-function-definition]
       restore_dtype: Optional[jnp.dtype] = None,
       keep_dataset_checkpoints: Optional[int] = None,
   ):
@@ -583,7 +583,7 @@ class Checkpointer(object):
     self.restore_dtype = restore_dtype
     self._original_dataset_iterator = dataset_iterator
     if isinstance(dataset_iterator, tf.data.Iterator):
-      dataset_iterator = _TfDataCheckpointer(dataset_iterator)
+      dataset_iterator = _TfDataCheckpointer(dataset_iterator)  # pyrefly: ignore[bad-assignment]
     elif isinstance(
         dataset_iterator, clu.data.dataset_iterator.TfDatasetIterator
     ):
@@ -657,7 +657,7 @@ class Checkpointer(object):
         metadata = array_serialization._get_metadata(arr)  # pylint: disable=protected-access
       else:
         local_chunk_info = self._partitioner.get_local_chunk_info(
-            arr.shape, axes
+            arr.shape, axes  # pyrefly: ignore[bad-argument-type]
         )
         write_shape = [
             si if sl == slice(None) else sl.stop - sl.start
@@ -675,7 +675,7 @@ class Checkpointer(object):
             'chunks': np.array(chunk_shape),
         }
 
-      spec = _get_spec(self.checkpoints_dir, arr, name, metadata)
+      spec = _get_spec(self.checkpoints_dir, arr, name, metadata)  # pyrefly: ignore[bad-argument-type]
 
       return _ParameterInfo(
           name,
@@ -706,15 +706,15 @@ class Checkpointer(object):
 
   def all_steps(self) -> Sequence[int]:
     """Returns list of available step numbers in ascending order."""
-    return all_steps(self.checkpoints_dir)
+    return all_steps(self.checkpoints_dir)  # pyrefly: ignore[bad-argument-type]
 
   def all_dataset_checkpoint_steps(self) -> Sequence[int]:
     """Returns list of available step numbers in ascending order."""
-    return all_dataset_checkpoint_steps(self.checkpoints_dir)
+    return all_dataset_checkpoint_steps(self.checkpoints_dir)  # pyrefly: ignore[bad-argument-type]
 
   def latest_step(self) -> Optional[int]:
     """Returns latest step number or None if no checkpoints exist."""
-    return latest_step(self.checkpoints_dir)
+    return latest_step(self.checkpoints_dir)  # pyrefly: ignore[bad-argument-type]
 
   def _remove_old_dataset_checkpoints(self):
     """Deletes old dataset checkpoints if there are more than allowed."""
@@ -724,7 +724,7 @@ class Checkpointer(object):
       if to_remove > 0:
         for step in existing_steps[:to_remove]:
           checkpoint_utils.remove_dataset_checkpoint(
-              self._get_checkpoint_dir(step), _TRAIN_DS_PREFIX
+              self._get_checkpoint_dir(step), _TRAIN_DS_PREFIX  # pyrefly: ignore[bad-argument-type]
           )
 
   def _remove_old_checkpoints(self):
@@ -737,7 +737,7 @@ class Checkpointer(object):
       return
 
     for step in existing_steps[:to_remove]:
-      checkpoint_utils.remove_checkpoint_dir(self._get_checkpoint_dir(step))
+      checkpoint_utils.remove_checkpoint_dir(self._get_checkpoint_dir(step))  # pyrefly: ignore[bad-argument-type]
 
   def save(
       self,
@@ -795,7 +795,7 @@ class Checkpointer(object):
           "Writing dataset iterator state to '%s'.", self._dataset_ckpt_name
       )
       try:
-        self._dataset_iterator.save(
+        self._dataset_iterator.save(  # pyrefly: ignore[missing-attribute]
             os.path.join(tmp_dir, self._dataset_ckpt_name)
         )
       except tf.errors.FailedPreconditionError as e:
@@ -1128,7 +1128,7 @@ class Checkpointer(object):
         dummy_written_state_dict, ckpt_state_dict
     )
     state_dict = self._read_state_from_tensorstore(
-        ckpt_path,
+        ckpt_path,  # pyrefly: ignore[bad-argument-type]
         written_state_dict,
         restore_parameter_infos=restore_parameter_infos,
         lazy_parameters=lazy_parameters,
@@ -1147,7 +1147,7 @@ class Checkpointer(object):
           "Restoring dataset iterator from '%s'.", self._dataset_ckpt_name
       )
       self._dataset_iterator.load(
-          os.path.join(ckpt_dir, self._dataset_ckpt_name)
+          os.path.join(ckpt_dir, self._dataset_ckpt_name)  # pyrefly: ignore[bad-argument-type]
       )
 
     restored_train_state = self._restore_train_state(state_dict)
@@ -1162,7 +1162,7 @@ class Checkpointer(object):
       self, state_dict: optimizers.OptimizerStateType
   ) -> train_state_lib.TrainState:
     """Restores a TrainState from an Optimizer state_dict."""
-    return self._train_state.restore_state(state_dict)
+    return self._train_state.restore_state(state_dict)  # pyrefly: ignore[bad-argument-type]
 
   def _create_lazy_awaitable_array(
       self,
@@ -1213,7 +1213,7 @@ class Checkpointer(object):
       )
 
     return LazyAwaitableArray.from_tensor_store_spec_or_array(
-        maybe_ts_spec, get_fn, dtype=restore_dtype
+        maybe_ts_spec, get_fn, dtype=restore_dtype  # pyrefly: ignore[bad-argument-type]
     )
 
   def _read_state_from_tensorstore(
@@ -1354,7 +1354,7 @@ class CheckpointerConstructor(typing_extensions.Protocol):
       dataset_iterator: Optional[tf.data.Iterator] = None,
       *,
       keep: Optional[int] = None,
-      save_dtype: jnp.dtype = np.float32,
+      save_dtype: jnp.dtype = np.float32,  # pyrefly: ignore[bad-function-definition]
       restore_dtype: Optional[jnp.dtype] = None,
       keep_dataset_checkpoints: Optional[int] = None,
   ) -> Checkpointer:
@@ -1519,7 +1519,7 @@ class SaveBestCheckpointer(Checkpointer):
       dataset_iterator: Optional[tf.data.Iterator] = None,
       *,
       keep: Optional[int] = None,
-      save_dtype: jnp.dtype = np.float32,
+      save_dtype: jnp.dtype = np.float32,  # pyrefly: ignore[bad-function-definition]
       restore_dtype: Optional[jnp.dtype] = None,
       metric_name_to_monitor: str = 'train/accuracy',
       metric_mode: str = 'max',
@@ -1579,7 +1579,7 @@ class SaveBestCheckpointer(Checkpointer):
 
     # Synchronous fetch of new events for existing_steps.
     metrics_by_step = populate_metrics_for_steps(
-        self.checkpoints_dir, self._metric_name_to_monitor, existing_steps
+        self.checkpoints_dir, self._metric_name_to_monitor, existing_steps  # pyrefly: ignore[bad-argument-type]
     )
     logging.info('SaveBestcheckpointer: collected metrics %s', metrics_by_step)
 
@@ -1609,7 +1609,7 @@ class SaveBestCheckpointer(Checkpointer):
     existing_steps.append(latest_checkpoint)
 
     for step in existing_steps[:to_remove]:
-      checkpoint_utils.remove_checkpoint_dir(self._get_checkpoint_dir(step))
+      checkpoint_utils.remove_checkpoint_dir(self._get_checkpoint_dir(step))  # pyrefly: ignore[bad-argument-type]
 
 
 def _no_optimizer_state(ckpt_contents: PyTree, use_orbax_format: bool) -> bool:
@@ -1766,7 +1766,7 @@ async def _read_ts(
 
   if params_on_devices:
     arr = await array_serialization.async_deserialize(
-        jax.sharding.NamedSharding(mesh, axes),
+        jax.sharding.NamedSharding(mesh, axes),  # pyrefly: ignore[bad-argument-type]
         tmp_ts_spec_dict,
     )
   else:
@@ -1792,7 +1792,7 @@ def fake_param_info(maybe_tspec: Any) -> Optional[_ParameterInfo]:
     )
   return _ParameterInfo(
       name='',  # We don't ever use the name.
-      shape=tuple(tspec.to_json()['metadata']['shape']) if tspec else None,
+      shape=tuple(tspec.to_json()['metadata']['shape']) if tspec else None,  # pyrefly: ignore[bad-argument-type]
       # We just believe the spec in the file.
       ts_spec=tspec,
       local_chunk_info=local_chunk_info,
@@ -1819,7 +1819,7 @@ def find_checkpoint(
   # If you aren't pointing at the msgpack checkpoint file
   if gfile.isdir(path):
     # If you didn't specify a step, try to get most recent step
-    step = latest_step(path) if step is None else step
+    step = latest_step(path) if step is None else step  # pyrefly: ignore[bad-argument-type]
     path = get_checkpoint_dir(path, step) if step is not None else path
     # Whether you supplied a step, found a step, or were already pointing at the
     # step, you are not pointing at a step directory, so now point to the
@@ -1860,7 +1860,7 @@ def load_t5x_checkpoint(
     A nested dictionary of weights and parameter states from the checkpoint.
   """
   start_time = time.time()
-  path = find_checkpoint(path, step)
+  path = find_checkpoint(path, step)  # pyrefly: ignore[bad-assignment]
   logging.info('Restoring from checkpoint: %s', path)
 
   # The msgpack file will have all the info we need about the parameter layout.
@@ -1929,7 +1929,7 @@ def load_t5x_checkpoint(
         params_on_devices=False,
     )
     return LazyAwaitableArray.from_tensor_store_spec_or_array(
-        maybe_ts_spec, get_fn, dtype=restore_dtype
+        maybe_ts_spec, get_fn, dtype=restore_dtype  # pyrefly: ignore[bad-argument-type]
     )
 
   state_dict = jax.tree_util.tree_map(
@@ -2002,7 +2002,7 @@ class DatasetCheckpointHandler(ocp.CheckpointHandler):
         ckpt = tf.train.Checkpoint(ds=item)
         ckpt.write(os.fspath(directory / self._checkpoint_filename))
       elif isinstance(item, clu.data.dataset_iterator.DatasetIterator):
-        item.save(os.fspath(directory / self._checkpoint_filename))
+        item.save(os.fspath(directory / self._checkpoint_filename))  # pyrefly: ignore[bad-argument-type]
 
   def restore(
       self,
@@ -2030,7 +2030,7 @@ class DatasetCheckpointHandler(ocp.CheckpointHandler):
             os.fspath(directory / self._checkpoint_filename)
         ).assert_consumed()
       elif isinstance(item, clu.data.dataset_iterator.DatasetIterator):
-        item.load(os.fspath(directory / self._checkpoint_filename))
+        item.load(os.fspath(directory / self._checkpoint_filename))  # pyrefly: ignore[bad-argument-type]
       return item
 
 
@@ -2055,7 +2055,7 @@ def _construct_save_args(
 ) -> ocp.SaveArgs:
   """Create SaveArgs for Orbax saving."""
   if param_info.name.split('.')[0] != 'target':
-    dtype = None
+    dtype = None  # pyrefly: ignore[bad-assignment]
   return ocp.SaveArgs(dtype=dtype)
 
 
@@ -2068,7 +2068,7 @@ def _construct_restore_args(
   if not isinstance(param_info, _OrbaxParamInfo):  # from fallback
     return ocp.RestoreArgs(dtype=dtype)
   if param_info.name.split('/')[0] != 'target':
-    dtype = None
+    dtype = None  # pyrefly: ignore[bad-assignment]
   if param_info.mesh_axes is None:
     return ocp.RestoreArgs(dtype=dtype)
   return ocp.ArrayRestoreArgs(
@@ -2274,7 +2274,7 @@ class OrbaxCheckpointManagerInterface:
         _STATE_KEY: self._state_handler,
         _DATASET_KEY: DatasetCheckpointHandler(
             checkpoint_filename=dataset_ckpt_name,
-            should_write_dataset_ckpt=self._should_write_dataset_ckpt,
+            should_write_dataset_ckpt=self._should_write_dataset_ckpt,  # pyrefly: ignore[bad-argument-type]
         ),
     }
 
@@ -2283,7 +2283,7 @@ class OrbaxCheckpointManagerInterface:
 
     options = ocp.CheckpointManagerOptions(
         max_to_keep=keep,
-        save_interval_steps=period,
+        save_interval_steps=period,  # pyrefly: ignore[bad-argument-type]
         keep_period=force_keep_period,
         best_fn=best_fn if metric_name_to_monitor is not None else None,
         best_mode=metric_mode,
@@ -2294,7 +2294,7 @@ class OrbaxCheckpointManagerInterface:
             timeout_secs=600,
         ),
     )
-    options.metric_name_to_monitor = metric_name_to_monitor
+    options.metric_name_to_monitor = metric_name_to_monitor  # pyrefly: ignore[missing-attribute]
     self._options = options
 
     if not gfile.isdir(directory):
@@ -2436,6 +2436,7 @@ class OrbaxCheckpointManagerInterface:
       )
       if ckpt_type is checkpoint_utils.CheckpointTypes.T5X_TF:
         raise ValueError(
+            # pyrefly: ignore[unsupported-operation]
             'Attempting to restore a TensorFlow checkpoint as a native T5X '
             'checkpoint. Use `restore_from_tf_checkpoint` instead. Path: '
             + ckpt_path
@@ -2472,8 +2473,8 @@ class OrbaxCheckpointManagerInterface:
     state_dict_to_restore, restore_args, transform_fn = (
         _construct_orbax_restoration_transforms(
             self._state_handler,
-            step,
-            directory,
+            step,  # pyrefly: ignore[bad-argument-type]
+            directory,  # pyrefly: ignore[bad-argument-type]
             state_dict,
             state_transformation_fns,
             restore_args,
@@ -2489,7 +2490,7 @@ class OrbaxCheckpointManagerInterface:
         ),
     }
     if self._should_write_dataset_ckpt:
-      args[_DATASET_KEY] = DatasetArgs(self._dataset_iterator)
+      args[_DATASET_KEY] = DatasetArgs(self._dataset_iterator)  # pyrefly: ignore[unsupported-operation]
     args = ocp.args.Composite(**args)
     restored = self._manager.restore(step, args=args, directory=directory)
     state_dict = restored[_STATE_KEY]
@@ -2546,7 +2547,7 @@ class OrbaxCheckpointManagerInterface:
         _construct_orbax_param_infos(self._train_state, self._partitioner),
         self._train_state,
         self._partitioner,
-        self._restore_dtype,
+        self._restore_dtype,  # pyrefly: ignore[bad-argument-type]
     )
 
 

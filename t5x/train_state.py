@@ -142,7 +142,7 @@ class FlaxOptimTrainState(flax.struct.PyTreeNode):
 
     # Split other_variables into mutables and their corresponding axes.
     flax_mutables, flax_mutables_axes = _split_variables_and_axes(
-        other_variables
+        other_variables  # pyrefly: ignore[bad-argument-type]
     )
 
     # If the optimizer supports `set_param_axes`, then assume that the model
@@ -255,7 +255,7 @@ class InferenceState(flax.struct.PyTreeNode):
 
     # Split other_variables into mutables and their corresponding axes.
     flax_mutables, flax_mutables_axes = _split_variables_and_axes(
-        other_variables
+        other_variables  # pyrefly: ignore[bad-argument-type]
     )
     flax_mutables_axes = flax_mutables_axes or None
     return InferenceState(

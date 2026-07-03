@@ -151,7 +151,7 @@ class SaveCheckpointConfig:
   )
   # CheckpointManager implementation to use.
   checkpoint_manager_cls: checkpoints.CheckpointManagerConstructor = (
-      checkpoints.OrbaxCheckpointManagerInterface
+      checkpoints.OrbaxCheckpointManagerInterface  # pyrefly: ignore[bad-assignment]
   )
 
   def __post_init__(self):
@@ -199,7 +199,7 @@ class RestoreCheckpointConfig:
   ] = ()
   # CheckpointManager implementation to use.
   checkpoint_manager_cls: checkpoints.CheckpointManagerConstructor = (
-      checkpoints.OrbaxCheckpointManagerInterface
+      checkpoints.OrbaxCheckpointManagerInterface  # pyrefly: ignore[bad-assignment]
   )
 
   def __post_init__(self):
@@ -328,7 +328,7 @@ class LegacyCheckpointer(orbax.checkpoint.Checkpointer):
           'Initializing parameters from TensorFlow checkpoint %s', path
       )
       return self._restore_checkpointer.restore_from_tf_checkpoint(
-          path, strict=self._strict
+          path, strict=self._strict  # pyrefly: ignore[bad-argument-type]
       )
     return self._restore_checkpointer.restore(
         path=path,
@@ -363,9 +363,9 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
       save_checkpointer = save_cfg.checkpointer_cls(  # pytype: disable=wrong-arg-types  # jnp-type
           train_state=train_state_shape,
           partitioner=partitioner,
-          checkpoints_dir=model_dir,
-          dataset_iterator=ds_iter if save_cfg.save_dataset else None,
-          save_dtype=save_cfg.dtype,
+          checkpoints_dir=model_dir,  # pyrefly: ignore[bad-argument-type]
+          dataset_iterator=ds_iter if save_cfg.save_dataset else None,  # pyrefly: ignore[bad-argument-type]
+          save_dtype=save_cfg.dtype,  # pyrefly: ignore[bad-argument-type]
           keep=save_cfg.keep,
           keep_dataset_checkpoints=save_cfg.keep_dataset_checkpoints,
       )
@@ -377,7 +377,7 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
           train_state=train_state_shape,
           partitioner=partitioner,
           checkpoints_dir='',  # unused for restore
-          dataset_iterator=ds_iter if restore_cfg.restore_dataset else None,
+          dataset_iterator=ds_iter if restore_cfg.restore_dataset else None,  # pyrefly: ignore[bad-argument-type]
           restore_dtype=jnp.dtype(restore_cfg.dtype)
           if restore_cfg.dtype
           else None,
@@ -389,7 +389,7 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
 
     self._checkpointer = LegacyCheckpointer(
         save_checkpointer=save_checkpointer,
-        restore_checkpointer=restore_checkpointer,
+        restore_checkpointer=restore_checkpointer,  # pyrefly: ignore[bad-argument-type]
         strict=strict,
     )
 
@@ -399,7 +399,7 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
   def close(self):
     pass
 
-  def save(
+  def save(  # pyrefly: ignore[bad-override]
       self,
       train_state: train_state_lib.TrainState,
       state_transformation_fns: Sequence[
@@ -413,13 +413,13 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
       state_transformation_fns: Transformations to apply, in order, to the state
         before writing.
     """
-    self._checkpointer.save(
+    self._checkpointer.save(  # pyrefly: ignore[missing-argument]
         path='',  # not used
         item=train_state,
         state_transformation_fns=state_transformation_fns,
     )
 
-  def restore(
+  def restore(  # pyrefly: ignore[bad-override]
       self,
       paths: Sequence[str],
       restore_cfg: Optional[RestoreCheckpointConfig] = None,
@@ -453,7 +453,7 @@ class LegacyCheckpointManager(orbax.checkpoint.CheckpointManager):
           'Initializing parameters from specific T5X checkpoint %s', path
       )
       restored.append(
-          self._checkpointer.restore(
+          self._checkpointer.restore(  # pyrefly: ignore[missing-argument]
               path=path,
               item=None,  # not used
               state_transformation_fns=restore_cfg.state_transformation_fns,
@@ -491,7 +491,7 @@ def restore(
     given paths, otherwise a sequence of TrainStates.
   """
   if restore_cfg is None or paths is None:
-    return None
+    return None  # pyrefly: ignore[bad-return]
 
   state_transformation_fns = restore_cfg.state_transformation_fns
   restored_checkpoints = []
@@ -739,7 +739,7 @@ def prepare_train_iter(
 ) -> clu.data.dataset_iterator.PeekableDatasetIterator:
   """Prepares the training input iterator."""
   if isinstance(train_iter, airio.AirIODatasetIterator):
-    return train_iter
+    return train_iter  # pyrefly: ignore[bad-return]
   if isinstance(train_iter, tf.data.Dataset):
     train_iter = clu.data.dataset_iterator.TfDatasetIterator(
         train_iter, checkpoint=True
@@ -775,14 +775,14 @@ def multihost_assert_equal(input_tree, fail_message: str = ''):
 def _hardware_uniform(  # pytype: disable=annotation-type-mismatch  # jnp-type
     rng_key: Array,
     shape: Shape,
-    dtype: jnp.dtype = np.float32,
+    dtype: jnp.dtype = np.float32,  # pyrefly: ignore[bad-function-definition]
     minval: Array = np.float32(0),
     maxval: Array = np.float32(1),
 ) -> Array:
   """Random uniform method that uses non-deterministic accelerator hardware."""
   del rng_key  # non-deterministic prng.
-  minval = jax.lax.convert_element_type(minval, dtype)
-  maxval = jax.lax.convert_element_type(maxval, dtype)
+  minval = jax.lax.convert_element_type(minval, dtype)  # pyrefly: ignore[bad-argument-type]
+  maxval = jax.lax.convert_element_type(maxval, dtype)  # pyrefly: ignore[bad-argument-type]
   return jax.lax.rng_uniform(minval, maxval, shape)
 
 
@@ -886,7 +886,7 @@ def create_learning_rate_scheduler(
     a function learning_rate(step): float -> {'learning_rate': float}, the
     step-dependent lr.
   """
-  factors = [n.strip() for n in factors.split('*')]
+  factors = [n.strip() for n in factors.split('*')]  # pyrefly: ignore[bad-assignment]
 
   def step_fn(step: jnp.ndarray) -> jnp.ndarray:
     """Step to learning rate function."""
@@ -1198,7 +1198,7 @@ class TrainStateInitializer:
   ) -> Optional[train_state_lib.TrainState]:
     """Initializes from checkpoint, if found, or from scratch."""
     return self.from_checkpoint(
-        ckpt_cfgs, ds_iter=ds_iter, init_rng=init_rng
+        ckpt_cfgs, ds_iter=ds_iter, init_rng=init_rng  # pyrefly: ignore[bad-argument-type]
     ) or self.from_scratch(init_rng)
 
 
@@ -1224,7 +1224,7 @@ def create_checkpoint_manager_and_restore(
     return train_state_initializer.from_scratch(rng).state_dict()
 
   restore_path_list = [restore_path] if restore_path else []
-  model_dir = model_dir or restore_checkpoint_cfg.path
+  model_dir = model_dir or restore_checkpoint_cfg.path  # pyrefly: ignore[bad-assignment]
   if use_orbax:
     checkpoint_manager = create_orbax_checkpoint_manager(
         save_cfg=save_checkpoint_cfg,
@@ -1324,7 +1324,7 @@ def create_orbax_checkpoint_manager(
       ):
         save_best_checkpointer = checkpoints.SaveBestCheckpointer(
             train_state=train_state,
-            checkpoints_dir=model_dir,
+            checkpoints_dir=model_dir,  # pyrefly: ignore[bad-argument-type]
             partitioner=partitioner,
         )
         extra_kwargs = {
@@ -1366,13 +1366,13 @@ def create_orbax_checkpoint_manager(
       extra_kwargs = _get_extra_kwargs(restore_cfg)
   ds_iter = ds_iter if should_save_restore_dataset else None
 
-  return checkpoint_manager_cls(
-      directory=model_dir,
+  return checkpoint_manager_cls(  # pyrefly: ignore[not-callable]
+      directory=model_dir,  # pyrefly: ignore[bad-argument-type]
       train_state=train_state,
       partitioner=partitioner,
-      dataset_iterator=ds_iter,
-      save_dtype=save_dtype,
-      restore_dtype=restore_dtype,
+      dataset_iterator=ds_iter,  # pyrefly: ignore[bad-argument-type]
+      save_dtype=save_dtype,  # pyrefly: ignore[bad-argument-type]
+      restore_dtype=restore_dtype,  # pyrefly: ignore[bad-argument-type]
       keep=keep,
       period=period,
       **extra_kwargs,
@@ -1413,7 +1413,7 @@ def log_model_info(
 
   with contextlib.ExitStack() as stack:
     writer = (
-        stack.enter_context(gfile.GFile(log_file, 'w'))
+        stack.enter_context(gfile.GFile(log_file, 'w'))  # pyrefly: ignore[bad-argument-type]
         if log_file is not None
         else None
     )
@@ -1634,9 +1634,9 @@ def get_infer_fn(
         ),
     )
     try:
-      original_ds_length = len(ds)
+      original_ds_length = len(ds)  # pyrefly: ignore[bad-argument-type]
       dataset_remainder = original_ds_length % batch_size  # pytype:disable=wrong-arg-types
-      logging.info('length of dataset = %s', len(ds))
+      logging.info('length of dataset = %s', len(ds))  # pyrefly: ignore[bad-argument-type]
     except TypeError as e:
       if str(e).endswith('dataset length is unknown.'):
         logging.warning(
@@ -2213,7 +2213,7 @@ class _RegexMap(collections.abc.Mapping):
   def __len__(self) -> int:
     return len(self._kvs)
 
-  def __iter__(self) -> Iterable[Tuple[re.Pattern[str], Any]]:
+  def __iter__(self) -> Iterable[Tuple[re.Pattern[str], Any]]:  # pyrefly: ignore[bad-override]
     return iter(self._kvs)
 
 
@@ -2241,7 +2241,7 @@ def override_params_axes_names(
         "Model variables do not contain a 'params_axes' collection to apply an "
         'override to.'
     )
-  model_variables = flax.core.unfreeze(model_variables)
+  model_variables = flax.core.unfreeze(model_variables)  # pyrefly: ignore[bad-assignment]
   flat_params = traverse_util.flatten_dict(model_variables['params'])
   flat_params_axes = traverse_util.flatten_dict(model_variables['params_axes'])
 

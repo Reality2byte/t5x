@@ -350,7 +350,7 @@ class MetricsManager(object):
       finally:
         if self._writer:
           self._writer.close()
-          self._writer = None
+          self._writer = None  # pyrefly: ignore[bad-assignment]
 
   @property
   def summary_writer(self) -> metric_writers.MetricWriter:
@@ -574,8 +574,8 @@ class BaseTrainer(abc.ABC):
           jnp.asarray([_time() - self._trainer_init_time])
       )
 
-    return self.train_metrics_manager.write_metrics_summary(
-        metrics, start_step + num_steps, num_steps
+    return self.train_metrics_manager.write_metrics_summary(  # pyrefly: ignore[bad-return]
+        metrics, start_step + num_steps, num_steps  # pyrefly: ignore[bad-argument-type]
     )
 
   def compile_train(self, batch: BatchType) -> None:
@@ -631,7 +631,7 @@ class BaseTrainer(abc.ABC):
               self._partitioner.mesh,
               self._partitioner.data_partition_spec,
           )
-        metrics_update = eval_step_fn(train_state, batch)
+        metrics_update = eval_step_fn(train_state, batch)  # pyrefly: ignore[bad-argument-type]
         if metrics:
           metrics = merge_metrics(metrics, metrics_update)
         else:
@@ -642,7 +642,7 @@ class BaseTrainer(abc.ABC):
       )
 
       eval_summaries[iter_name] = mm.write_metrics_summary(  # pytype: disable=wrong-arg-types  # jax-ndarray
-          metrics, train_state.step, num_steps
+          metrics, train_state.step, num_steps  # pyrefly: ignore[bad-argument-type]
       )
 
     # TODO(adarob): Return futures.

@@ -61,7 +61,7 @@ class LazyArray(metaclass=abc.ABCMeta):
 
   @property
   def nbytes(self) -> int:
-    return np.prod(self._shape) * self._dtype.itemsize
+    return np.prod(self._shape) * self._dtype.itemsize  # pyrefly: ignore[bad-return]
 
   def astype(self, dtype: np.dtype) -> 'LazyArray':
     return type(self)(self._shape, dtype, self._get_fn)  # pytype: disable=not-instantiable
@@ -268,7 +268,7 @@ def global_step(opts, key, val):
   del opts, key
   return (
       'state/step',
-      val.astype(np.int32).get() if isinstance(val, LazyArray) else val,
+      val.astype(np.int32).get() if isinstance(val, LazyArray) else val,  # pyrefly: ignore[bad-argument-type]
   )
 
 

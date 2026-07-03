@@ -90,7 +90,7 @@ def precompile(
   # Compiling does not care about loading real weights.
   train_state_initializer = utils.TrainStateInitializer(
       optimizer_def=model.optimizer_def,
-      init_fn=model.get_initial_variables,
+      init_fn=model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
       input_shapes=input_shapes,
       input_types=input_types,
       partitioner=partitioner,
@@ -102,7 +102,7 @@ def precompile(
     return trainer_lib.train_with_lr(  # pytype: disable=wrong-arg-types  # jax-ndarray
         train_state,
         batch,
-        learning_rate=1e-3,
+        learning_rate=1e-3,  # pyrefly: ignore[bad-argument-type]
         dropout_rng=trainer_rng,
         model=model,
         num_microbatches=None,

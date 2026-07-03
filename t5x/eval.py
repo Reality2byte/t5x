@@ -103,7 +103,7 @@ class InferenceEvaluator:
       # Disable loggers if log dir is not provided.
       kwargs['logger_cls'] = ()
     self._seqio_evaluator = inference_evaluator_cls(
-        mixture_or_task_name=infer_eval_dataset_cfg.mixture_or_task_name,
+        mixture_or_task_name=infer_eval_dataset_cfg.mixture_or_task_name,  # pyrefly: ignore[bad-argument-type]
         feature_converter=model.FEATURE_CONVERTER_CLS(pack=False),
         eval_split=infer_eval_dataset_cfg.split,
         use_cached=infer_eval_dataset_cfg.use_cached,
@@ -144,21 +144,21 @@ class InferenceEvaluator:
     """
     if not self._predict_fn:
       self._predict_fn = utils.get_infer_fn(
-          infer_step=self._model.predict_batch,
+          infer_step=self._model.predict_batch,  # pyrefly: ignore[bad-argument-type]
           batch_size=self._infer_eval_dataset_cfg.batch_size,
           train_state_axes=train_state_axes,
           partitioner=self._partitioner,
       )
 
       self._predict_with_aux_fn = utils.get_infer_fn(
-          infer_step=self._model.predict_batch_with_aux,
+          infer_step=self._model.predict_batch_with_aux,  # pyrefly: ignore[bad-argument-type]
           batch_size=self._infer_eval_dataset_cfg.batch_size,
           train_state_axes=train_state_axes,
           partitioner=self._partitioner,
       )
 
       self._score_fn = utils.get_infer_fn(
-          infer_step=self._model.score_batch,
+          infer_step=self._model.score_batch,  # pyrefly: ignore[bad-argument-type]
           batch_size=self._infer_eval_dataset_cfg.batch_size,
           train_state_axes=train_state_axes,
           partitioner=self._partitioner,
@@ -170,9 +170,9 @@ class InferenceEvaluator:
         predict_fn=functools.partial(
             self._predict_fn, train_state=train_state, rng=jax.random.PRNGKey(0)
         ),
-        score_fn=functools.partial(self._score_fn, train_state=train_state),
+        score_fn=functools.partial(self._score_fn, train_state=train_state),  # pyrefly: ignore[bad-argument-type]
         predict_with_aux_fn=functools.partial(
-            self._predict_with_aux_fn,
+            self._predict_with_aux_fn,  # pyrefly: ignore[bad-argument-type]
             train_state=train_state,
             rng=jax.random.PRNGKey(0),
         ),
@@ -208,13 +208,13 @@ def evaluate(
     output_dir: str,
     inference_evaluator_cls: Optional[
         utils.EvaluatorConstructor
-    ] = seqio.Evaluator,
+    ] = seqio.Evaluator,  # pyrefly: ignore[bad-function-definition]
     training_evaluator_cls: Optional[Type[trainer_lib.Trainer]] = None,
     summarize_config_fn: SummarizeConfigFn = gin_utils.summarize_gin_config,
     train_state_initializer_cls: Type[
         utils.TrainStateInitializer
     ] = utils.TrainStateInitializer,
-    train_eval_get_dataset_fn: utils.GetEvalDatasetCallable = utils.get_training_eval_datasets,
+    train_eval_get_dataset_fn: utils.GetEvalDatasetCallable = utils.get_training_eval_datasets,  # pyrefly: ignore[bad-function-definition]
     fallback_init_rng: Optional[int] = None,
     use_orbax: bool = True,
 ):
@@ -255,7 +255,7 @@ def evaluate(
 
   evaluator = InferenceEvaluator(
       dataset_cfg,
-      inference_evaluator_cls,
+      inference_evaluator_cls,  # pyrefly: ignore[bad-argument-type]
       model,
       partitioner,
       log_dir=output_dir,
@@ -277,7 +277,7 @@ def evaluate(
 
   train_state_initializer = train_state_initializer_cls(
       optimizer_def=None,  # Do not load optimizer state.
-      init_fn=model.get_initial_variables,
+      init_fn=model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
       input_shapes=input_shapes,
       partitioner=partitioner,
   )
@@ -299,13 +299,13 @@ def evaluate(
 
     train_evaluator = training_evaluator_cls(  # pytype:disable=wrong-arg-types
         model=model,
-        train_state=None,  # Will replace later.
+        train_state=None,  # Will replace later.  # pyrefly: ignore[bad-argument-type]
         partitioner=partitioner,
         train_state_axes=train_state_axes,
-        eval_names=train_eval_datasets.keys(),
+        eval_names=train_eval_datasets.keys(),  # pyrefly: ignore[bad-argument-type]
         summary_dir=output_dir,
         rng=jax.random.PRNGKey(0),  # unused
-        learning_rate_fn=None,  # unused
+        learning_rate_fn=None,  # unused  # pyrefly: ignore[bad-argument-type]
         num_microbatches=None,  # unused
     )
 
@@ -362,15 +362,15 @@ def evaluate(
     )
 
   if fallback_init_rng is not None:
-    fallback_init_rng = jax.random.PRNGKey(fallback_init_rng)
+    fallback_init_rng = jax.random.PRNGKey(fallback_init_rng)  # pyrefly: ignore[bad-assignment]
 
   for ckpt_path in ckpt_paths:
     train_state, _ = utils.create_checkpoint_manager_and_restore(
         train_state_initializer,
         partitioner,
-        restore_cfg,
+        restore_cfg,  # pyrefly: ignore[bad-argument-type]
         ckpt_path,
-        fallback_init_rng,
+        fallback_init_rng,  # pyrefly: ignore[bad-argument-type]
         use_orbax=use_orbax,
     )
     if train_state is None:

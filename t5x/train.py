@@ -113,11 +113,11 @@ def train(
     summarize_config_fn: Callable[
         [str, metric_writers.MetricWriter, int], None
     ],
-    inference_evaluator_cls: utils.EvaluatorConstructor = seqio.Evaluator,
+    inference_evaluator_cls: utils.EvaluatorConstructor = seqio.Evaluator,  # pyrefly: ignore[bad-function-definition]
     get_dataset_fn: utils.GetDatasetCallable = utils.get_dataset,
     concurrent_metrics: bool = True,
     actions: Optional[Mapping[str, Sequence[trainer_lib.BaseAction]]] = None,
-    train_eval_get_dataset_fn: utils.GetEvalDatasetCallable = utils.get_training_eval_datasets,
+    train_eval_get_dataset_fn: utils.GetEvalDatasetCallable = utils.get_training_eval_datasets,  # pyrefly: ignore[bad-function-definition]
     run_eval_before_training: bool = False,
     train_state_initializer_cls: Type[
         utils.TrainStateInitializer
@@ -322,7 +322,7 @@ def train(
           else checkpoints.Checkpointer,
           # Restore dataset state if it is being saved.
           restore_dataset=(
-              checkpoint_cfg.save and checkpoint_cfg.save.save_dataset
+              checkpoint_cfg.save and checkpoint_cfg.save.save_dataset  # pyrefly: ignore[bad-argument-type]
           ),
           state_transformation_fns=state_transforms_for_restore,
       )
@@ -349,7 +349,7 @@ def train(
   init_or_restore_tick = time.time()
   train_state_initializer = train_state_initializer_cls(
       optimizer_def=model.optimizer_def,
-      init_fn=model.get_initial_variables,
+      init_fn=model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
       input_shapes=input_shapes,
       input_types=input_types,
       partitioner=partitioner,
@@ -370,7 +370,7 @@ def train(
         utils.create_checkpoint_manager_and_restore(
             train_state_initializer,
             partitioner,
-            valid_restore_cfg,
+            valid_restore_cfg,  # pyrefly: ignore[bad-argument-type]
             restore_paths[0] if restore_paths else None,
             init_rng,
             save_checkpoint_cfg=checkpoint_cfg.save,
@@ -410,7 +410,7 @@ def train(
     )
   else:
     steps_per_epoch = total_steps
-  stats_period = stats_period or steps_per_epoch
+  stats_period = stats_period or steps_per_epoch  # pyrefly: ignore[bad-assignment]
   if (
       eval_period
       and eval_period % steps_per_epoch
@@ -434,7 +434,7 @@ def train(
       train_state=train_state,
       partitioner=partitioner,
       train_state_axes=train_state_axes,
-      eval_names=train_eval_datasets.keys(),
+      eval_names=train_eval_datasets.keys(),  # pyrefly: ignore[bad-argument-type]
       summary_dir=model_dir,
       rng=trainer_rng,
   )
@@ -475,11 +475,11 @@ def train(
     )
 
   # Transform the string key into proper ActionMode enum.
-  actions = {trainer_lib.ActionMode[k]: v for k, v in actions.items()}
+  actions = {trainer_lib.ActionMode[k]: v for k, v in actions.items()}  # pyrefly: ignore[bad-assignment]
 
   if (
       concurrent_metrics
-      and actions.get(trainer_lib.ActionMode.INFER_EVAL, None) is not None
+      and actions.get(trainer_lib.ActionMode.INFER_EVAL, None) is not None  # pyrefly: ignore[missing-attribute]
   ):
     logging.warning(
         'Actions for INFER_EVAL will not be triggered when async '
@@ -487,7 +487,7 @@ def train(
     )
   if (
       concurrent_metrics
-      and actions.get(trainer_lib.ActionMode.TRAIN, None) is not None
+      and actions.get(trainer_lib.ActionMode.TRAIN, None) is not None  # pyrefly: ignore[missing-attribute]
   ):
     logging.warning(
         'Actions for TRAIN will not be triggered when async '
@@ -516,9 +516,9 @@ def train(
     eval_summaries = trainer.eval(eval_batch_iters)
     trainer.stop_training = run_actions(
         trainer_lib.ActionMode.TRAIN_EVAL,  # pytype: disable=wrong-arg-types  # jax-ndarray
-        actions,
+        actions,  # pyrefly: ignore[bad-argument-type]
         trainer.train_state,
-        eval_summaries,
+        eval_summaries,  # pyrefly: ignore[bad-argument-type]
     )
 
   def _run_inference_eval():
@@ -533,7 +533,7 @@ def train(
       all_metrics_done = all_metrics.result() or {}
       trainer.stop_training = run_actions(
           trainer_lib.ActionMode.INFER_EVAL,
-          actions,
+          actions,  # pyrefly: ignore[bad-argument-type]
           trainer.train_state,
           all_metrics_done,
       )
@@ -663,7 +663,7 @@ def train(
   checkpoint_steps_index = 0
 
   # Main Loop over "epochs".
-  for epoch in range(first_epoch, num_epochs):
+  for epoch in range(first_epoch, num_epochs):  # pyrefly: ignore[bad-argument-type]
     final_epoch = epoch == num_epochs - 1
     logging.info('Epoch %d of %d', epoch, num_epochs)
 
@@ -689,14 +689,14 @@ def train(
               'Stopping training loop early since `stop_training` is requested.'
           )
           break
-        inner_num_steps = min(epoch_end_step - host_step, stats_period)
+        inner_num_steps = min(epoch_end_step - host_step, stats_period)  # pyrefly: ignore[bad-specialization]
 
         # first index in checkpoint_steps list will not always be 0 (in cases
         # where first_step is non-zero, for example), so we must iterate to the
         # first un-trained step in checkpoint_steps list to not re-train /
         # save old steps
         checkpoint_steps_index = utils.find_first_checkpoint_step(
-            checkpoint_steps_index, checkpoint_steps, first_step, host_step
+            checkpoint_steps_index, checkpoint_steps, first_step, host_step  # pyrefly: ignore[bad-argument-type]
         )
         # check if inner_num_steps will skip a checkpoint_step that must be
         # saved, if so, then iterate only to that step and save a checkpoint
@@ -704,12 +704,12 @@ def train(
         is_checkpoint_step = False
         (inner_num_steps, is_checkpoint_step) = utils.find_next_checkpoint_step(
             checkpoint_steps_index,
-            inner_num_steps,
+            inner_num_steps,  # pyrefly: ignore[bad-argument-type]
             is_checkpoint_step,
             host_step,
-            checkpoint_steps,
-            epoch_end_step,
-            checkpoint_period,
+            checkpoint_steps,  # pyrefly: ignore[bad-argument-type]
+            epoch_end_step,  # pyrefly: ignore[bad-argument-type]
+            checkpoint_period,  # pyrefly: ignore[bad-argument-type]
             first_step,
         )
         # Handled separately if this is the overall last step.
@@ -726,9 +726,9 @@ def train(
           # given no `task` will be applied.
           trainer.stop_training = run_actions(  # pytype: disable=wrong-arg-types  # jax-ndarray
               trainer_lib.ActionMode.TRAIN,
-              actions,
+              actions,  # pyrefly: ignore[bad-argument-type]
               trainer.train_state,
-              {TRAIN_METRIC_KEY: train_summary.result()},
+              {TRAIN_METRIC_KEY: train_summary.result()},  # pyrefly: ignore[bad-argument-type]
           )
 
         if is_checkpoint_step and checkpoint_manager:
@@ -767,7 +767,7 @@ def train(
         and (final_epoch or step_offset % checkpoint_period == 0)
         and checkpoint_manager
     ):
-      train_summary.result()
+      train_summary.result()  # pyrefly: ignore[unbound-name]
       logging.info('Saving checkpoint.')
       checkpoint_tick = time.time()
       # Make sure last train step has completed before starting the clock.

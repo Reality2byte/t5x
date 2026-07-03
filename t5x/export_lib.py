@@ -264,7 +264,7 @@ def get_train_state_initializer(
       input_shapes[k] += trailing_shapes[k]
   train_state_initializer = utils.TrainStateInitializer(
       optimizer_def=None,
-      init_fn=model.get_initial_variables,
+      init_fn=model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
       input_shapes=input_shapes,
       partitioner=partitioner,
   )
@@ -345,7 +345,7 @@ def create_inference_function(
         else output_len
     )
     inference_mode = CustomInferenceMode(
-        default_mode_params['model_fn_name'],
+        default_mode_params['model_fn_name'],  # pyrefly: ignore[bad-argument-type]
         fetch_output=functools.partial(
             flatten, assert_output_len=assert_output_len
         ),
@@ -432,7 +432,7 @@ def load_params_from_checkpoint(
     train_state, _ = utils.create_checkpoint_manager_and_restore(
         train_state_initializer=train_state_initializer,
         partitioner=partitioner,
-        restore_checkpoint_cfg=restore_cfg,
+        restore_checkpoint_cfg=restore_cfg,  # pyrefly: ignore[bad-argument-type]
         restore_path=ckpt_paths[0],
         fallback_init_rng=jax.random.PRNGKey(0),
         save_checkpoint_cfg=None,
@@ -509,7 +509,7 @@ def truncate_and_pad_tokenized_input(
           'Expected the largest allowed length to be the same as the task'
           f' feature length {max_length}, but got {allowed_lengths[-1]}.'
       )
-    max_length = bucketize_tokenized_input(input_tensor, allowed_lengths)
+    max_length = bucketize_tokenized_input(input_tensor, allowed_lengths)  # pyrefly: ignore[bad-assignment]
   input_tensor = input_tensor[:max_length]
   input_tensor = tf.pad(
       input_tensor, [[0, max_length - tf.shape(input_tensor)[0]]]
@@ -911,7 +911,7 @@ class PreprocessorFnFromTask(object):
     Returns:
       A Mapping from feature names to batch features.
     """
-    ds = tf.data.Dataset.from_tensor_slices(examples)
+    ds = tf.data.Dataset.from_tensor_slices(examples)  # pyrefly: ignore[bad-argument-type]
     # Dataset of parsed tf Examples.
     ds = ds.map(self.parse_example)
     if self.run_precache:
@@ -995,13 +995,13 @@ def create_preprocessor_with_decoder_params(
   # TODO(marcrasi): Delete after migrating clients.
   if 'batch_size' in inspect.signature(create_preprocessor_fn).parameters:
     # New signature.
-    preprocessor, input_signature = create_preprocessor_fn(
-        batch_size, output_features, task_feature_lengths, tokenized_inputs
+    preprocessor, input_signature = create_preprocessor_fn(  # pyrefly: ignore[not-iterable]
+        batch_size, output_features, task_feature_lengths, tokenized_inputs  # pyrefly: ignore[bad-argument-count, bad-argument-type]
     )  # type: ignore
   else:
     # Old signature.
-    preprocessor = create_preprocessor_fn(
-        output_features, task_feature_lengths, tokenized_inputs
+    preprocessor = create_preprocessor_fn(  # pyrefly: ignore[missing-argument]
+        output_features, task_feature_lengths, tokenized_inputs  # pyrefly: ignore[bad-argument-type]
     )  # type: ignore
     input_signature = create_single_tensor_input_signature(
         batch_size, task_feature_lengths, tokenized_inputs
@@ -1013,14 +1013,14 @@ def create_preprocessor_with_decoder_params(
     decoder_params_values = args[-num_decoder_params:]
     inputs = args[:-num_decoder_params]
 
-    features = dict(preprocessor(*inputs))
+    features = dict(preprocessor(*inputs))  # pyrefly: ignore[not-callable]
 
     # Add decoder params as additional features. They are removed from the
     # features dict in `create_inference_function`.
     decoder_params = {}
     for (name, _, _), value in zip(decoder_params_spec, decoder_params_values):
       decoder_params[name] = value
-    features['decoder_params'] = decoder_params
+    features['decoder_params'] = decoder_params  # pyrefly: ignore[unsupported-operation]
 
     return features
 
@@ -1378,11 +1378,11 @@ def _standardize_output_dirs(output_dir: Union[str, Mapping[str, str]]):
     output_dirs = dict(output_dir)
   if 'cpu' not in output_dirs:
     # Add an output dir for cpu, with a default name.
-    output_dir = output_dirs.get('tpu', output_dirs.get('gpu'))
+    output_dir = output_dirs.get('tpu', output_dirs.get('gpu'))  # pyrefly: ignore[bad-assignment]
     if output_dir is None:
       raise ValueError('output_dir["gpu"] or output_dir["tpu"] is mandatory')
     output_dirs['cpu'] = os.path.join(
-        os.path.dirname(output_dir) + '_cpu', os.path.basename(output_dir)
+        os.path.dirname(output_dir) + '_cpu', os.path.basename(output_dir)  # pyrefly: ignore[no-matching-overload]
     )
     # We only check the version number when cpu directory is not provided. This
     # is to be backwards compatible with the old behavior. The old behavior
@@ -1558,7 +1558,7 @@ def save(
   logging.info('jax.local_devices: %s', jax.local_devices())  # Seems necessary.
   logging.info('Creating inference function...')
   train_state_initializer = get_train_state_initializer(
-      model, partitioner, task_feature_lengths, batch_size, trailing_shapes
+      model, partitioner, task_feature_lengths, batch_size, trailing_shapes  # pyrefly: ignore[bad-argument-type]
   )
 
   output_features = _standardize_output_features(
@@ -1577,13 +1577,13 @@ def save(
   # TODO(marcrasi): Delete after migrating clients.
   if 'batch_size' in inspect.signature(create_preprocessor_fn).parameters:
     # New signature.
-    preprocessor, input_signature = create_preprocessor_fn(
-        batch_size, output_features, task_feature_lengths, tokenized_inputs
+    preprocessor, input_signature = create_preprocessor_fn(  # pyrefly: ignore[not-iterable]
+        batch_size, output_features, task_feature_lengths, tokenized_inputs  # pyrefly: ignore[bad-argument-count, bad-argument-type]
     )  # type: ignore
   else:
     # Old signature.
-    preprocessor = create_preprocessor_fn(
-        output_features, task_feature_lengths, tokenized_inputs
+    preprocessor = create_preprocessor_fn(  # pyrefly: ignore[missing-argument]
+        output_features, task_feature_lengths, tokenized_inputs  # pyrefly: ignore[bad-argument-type]
     )  # type: ignore
     input_signature = create_single_tensor_input_signature(
         batch_size, task_feature_lengths, tokenized_inputs
@@ -1594,7 +1594,7 @@ def save(
   decoding_state_callback_fn = None
   if create_decoding_state_callback_fn is not None:
     decoding_state_callback_fn = create_decoding_state_callback_fn(
-        vocab=output_vocab,
+        vocab=output_vocab,  # pyrefly: ignore[bad-argument-type]
         call_tf_graph=True,
     )
 
@@ -1617,14 +1617,14 @@ def save(
   params = load_params_from_checkpoint(
       restore_checkpoint_cfg=restore_checkpoint_cfg,
       train_state_initializer=train_state_initializer,
-      partitioner=partitioner,
+      partitioner=partitioner,  # pyrefly: ignore[bad-argument-type]
   )
 
   logging.info('Preparing Module to save...')
   if decode_outputs is None:
     decode_outputs = not tokenized_inputs
   postprocessor = create_postprocessor_fn(
-      output_vocab, inference_mode, decode_outputs
+      output_vocab, inference_mode, decode_outputs  # pyrefly: ignore[bad-argument-type]
   )
   module = exportable_module_cls(
       preproc_tf_fn=preprocessor,

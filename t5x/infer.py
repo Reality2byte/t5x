@@ -81,7 +81,7 @@ class FailFastThreadPoolExecutor(concurrent.futures.ThreadPoolExecutor):
         exception = future.exception(timeout=0 if wait else None)
       except concurrent.futures.TimeoutError:
         still_incomplete_futures.append(future)
-      if exception is not None:
+      if exception is not None:  # pyrefly: ignore[unbound-name]
         raise exception
 
     self._incomplete_futures = still_incomplete_futures
@@ -152,7 +152,7 @@ def create_task_from_tfexample_file(
 
   task = seqio.TaskRegistry.add(
       name=f'infer_{task_id}',
-      source=seqio.TFExampleDataSource(
+      source=seqio.TFExampleDataSource(  # pyrefly: ignore[bad-argument-type]
           {'infer': paths},
           feature_description=feature_description,
           reader_cls=reader,
@@ -460,7 +460,7 @@ def infer(
     utils.import_module(dataset_cfg.module)
   host_shard_info = seqio.ShardInfo(index=shard_id, num_shards=num_shards)
   task_or_mixture = seqio.maybe_get_mixture_or_task(
-      dataset_cfg.mixture_or_task_name
+      dataset_cfg.mixture_or_task_name  # pyrefly: ignore[bad-argument-type]
   )
 
   feature_converter = model.FEATURE_CONVERTER_CLS(pack=False)
@@ -500,7 +500,7 @@ def infer(
   # TODO(adarob): Support inference over multiple checkpoints.
   train_state_initializer = train_state_initializer_cls(
       optimizer_def=None,  # Do not load optimizer state.
-      init_fn=model.get_initial_variables,
+      init_fn=model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
       input_shapes=input_shapes,
       input_types=input_types,
       partitioner=partitioner,
@@ -517,14 +517,14 @@ def infer(
   # Disable strictness since we are dropping the optimizer state.
   restore_checkpoint_cfg.strict = False
   if fallback_init_rng is not None:
-    fallback_init_rng = jax.random.PRNGKey(fallback_init_rng)
+    fallback_init_rng = jax.random.PRNGKey(fallback_init_rng)  # pyrefly: ignore[bad-assignment]
 
   train_state, _ = utils.create_checkpoint_manager_and_restore(
       train_state_initializer,
       partitioner,
       restore_checkpoint_cfg,
-      restore_checkpoint_cfg.path,
-      fallback_init_rng,
+      restore_checkpoint_cfg.path,  # pyrefly: ignore[bad-argument-type]
+      fallback_init_rng,  # pyrefly: ignore[bad-argument-type]
       use_orbax=use_orbax,
   )
   if train_state is None:
@@ -539,7 +539,7 @@ def infer(
 
   infer_fn = functools.partial(
       utils.get_infer_fn(
-          infer_step=infer_step,
+          infer_step=infer_step,  # pyrefly: ignore[bad-argument-type]
           batch_size=batch_size,
           train_state_axes=train_state_initializer.train_state_axes,  # pytype: disable=attribute-error  # jax-api-types
           partitioner=partitioner,
@@ -567,7 +567,7 @@ def infer(
 
     # Zip task and model features.
     # (task, model)
-    infer_ds = tf.data.Dataset.zip((ds, model_ds))
+    infer_ds = tf.data.Dataset.zip((ds, model_ds))  # pyrefly: ignore[bad-argument-type]
 
     # Create batches the size of each chunk and index them.
     # (i, [(task, model)] * chunk_size)
@@ -691,7 +691,7 @@ def infer(
           # checkpoint will be moved to the canonical location to be used if
           # restart occurs.
           ckpt_tick = time.time()
-          chunk_ckpt_path = input_ckpt.write(
+          chunk_ckpt_path = input_ckpt.write(  # pyrefly: ignore[unbound-name]
               os.path.join(tmp_dir, f'{chunk}.ckpt')
           )
           logging.info(

@@ -146,7 +146,7 @@ def run(main):
 @gin.configurable
 def sum_fn(var1=gin.REQUIRED, var2=gin.REQUIRED):
   """sum function to use inside gin files."""
-  return var1 + var2
+  return var1 + var2  # pyrefly: ignore[unsupported-operation]
 
 
 @gin.configurable
@@ -160,7 +160,7 @@ def string_split_fn(
     text=gin.REQUIRED, separator=gin.REQUIRED, maxsplit=-1, index=None
 ):
   """String split function to use inside gin files."""
-  values = text.split(separator, maxsplit)
+  values = text.split(separator, maxsplit)  # pyrefly: ignore[missing-attribute]
   if index is None:
     return values
   else:

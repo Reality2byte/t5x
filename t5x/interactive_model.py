@@ -155,7 +155,7 @@ class InteractiveModel(abc.ABC):
       num_partitions = np.prod(partitioner._model_parallel_submesh)
     else:
       num_partitions = partitioner._num_partitions
-    if jax.device_count() % num_partitions != 0:
+    if jax.device_count() % num_partitions != 0:  # pyrefly: ignore[unsupported-operation]
       raise ValueError(
           "The number of devices available must be a multiple of the number of",
           f" partitions. There are {jax.device_count()} devices available, but",
@@ -191,11 +191,11 @@ class InteractiveModel(abc.ABC):
     else:
       self._restore_checkpoint_cfg = None
     self._save_checkpoint_cfg = utils.SaveCheckpointConfig(
-        dtype=dtype, keep=5, save_dataset=False, period=1000
+        dtype=dtype, keep=5, save_dataset=False, period=1000  # pyrefly: ignore[bad-argument-type]
     )
     self._train_state_initializer = utils.TrainStateInitializer(
         optimizer_def=self._model.optimizer_def,
-        init_fn=self._model.get_initial_variables,
+        init_fn=self._model.get_initial_variables,  # pyrefly: ignore[bad-argument-type]
         input_shapes=self._input_shapes,
         input_types=self._input_types,
         partitioner=self._partitioner,
@@ -244,7 +244,7 @@ class InteractiveModel(abc.ABC):
             else checkpoints.Checkpointer,
             # Restore dataset state if it is being saved.
             restore_dataset=(
-                self._save_checkpoint_cfg
+                self._save_checkpoint_cfg  # pyrefly: ignore[bad-argument-type]
                 and self._save_checkpoint_cfg.save_dataset
             ),
             state_transformation_fns=state_transforms_for_restore,
@@ -258,7 +258,7 @@ class InteractiveModel(abc.ABC):
     self._train_state = self._checkpoint_manager.restore(
         restore_paths,
         valid_restore_cfg,
-        utils.get_fallback_state(valid_restore_cfg, get_state, self._init_rng),
+        utils.get_fallback_state(valid_restore_cfg, get_state, self._init_rng),  # pyrefly: ignore[bad-argument-type]
     )
 
     # 3. If no checkpoint to restore, init from scratch.
@@ -325,7 +325,7 @@ class InteractiveModel(abc.ABC):
       raise ValueError(
           "Expected a single train state, but instead received a Sequence."
       )
-    return int(self._train_state.step)
+    return int(self._train_state.step)  # pyrefly: ignore[missing-attribute]
 
   def train_step(self, examples: Sequence[Union[str, dict[str, str]]]):
     """Train function.
@@ -428,7 +428,7 @@ class InteractiveModel(abc.ABC):
           "Expected a single train state, but instead received a Sequence."
       )
 
-    first_step = int(utils.get_local_data(self._train_state.step))
+    first_step = int(utils.get_local_data(self._train_state.step))  # pyrefly: ignore[missing-attribute]
     self._train_summary = self._trainer.train(
         iterator, 1, start_step=first_step
     )
@@ -510,7 +510,7 @@ class InteractiveModel(abc.ABC):
         dataset, task_feature_lengths=self._task_feature_lengths
     )
     # Zip task and model features.
-    infer_dataset = tf.data.Dataset.zip((dataset, model_dataset))
+    infer_dataset = tf.data.Dataset.zip((dataset, model_dataset))  # pyrefly: ignore[bad-argument-type]
     # Create batches and index them.
     infer_dataset = infer_dataset.padded_batch(
         self._batch_size, drop_remainder=False
@@ -565,7 +565,7 @@ class InteractiveModel(abc.ABC):
         all_aux_values = aux_values
       else:
         for key, values in aux_values.items():
-          all_aux_values[key] += values
+          all_aux_values[key] += values  # pyrefly: ignore[unsupported-operation]
 
     return all_inferences, all_aux_values
 
@@ -693,7 +693,7 @@ class InteractiveModel(abc.ABC):
         seqio.preprocessors.append_eos,
     ]
     return self.evaluate_with_preprocessors(
-        examples=examples,
+        examples=examples,  # pyrefly: ignore[bad-argument-type]
         preprocessors=preprocessors,
         metric_fns=metric_fns,
         postprocessor=None,
@@ -806,7 +806,7 @@ class InteractiveModel(abc.ABC):
     return self._compute_metrics(
         targets,
         predictions,
-        aux_values,
+        aux_values,  # pyrefly: ignore[bad-argument-type, unbound-name]
         scores,  # pytype: disable=wrong-arg-types  # mapping-is-not-sequence
         predict_metric_fns,
         predict_with_aux_metric_fns,
@@ -865,7 +865,7 @@ class InteractiveModel(abc.ABC):
       Predictions, scores, and metrics for the final step of the training loop.
     """
     # Ensure all batches are `num_steps` in length
-    train_batches = _get_equal_length_batches(train_batches, num_steps)
+    train_batches = _get_equal_length_batches(train_batches, num_steps)  # pyrefly: ignore[bad-argument-type]
 
     predictions = None
     scores = None
@@ -874,7 +874,7 @@ class InteractiveModel(abc.ABC):
       if train_batch:
         self.train_step(train_batch)
       # Run inference/evaluation every `eval_period` steps.
-      if step_num % eval_period == 0:
+      if step_num % eval_period == 0:  # pyrefly: ignore[unsupported-operation]
         # Run on all batches for inference/evaluation.
         if predict_batches:
           for predict_batch in predict_batches:
@@ -926,7 +926,7 @@ def get_dataset_from_natural_text_examples(
       example_dict = {"input": example, "target": ""}
     merged_examples["inputs"].append(example_dict["input"])
     merged_examples["targets"].append(example_dict["target"])
-  dataset = tf.data.Dataset.from_tensor_slices(merged_examples)
+  dataset = tf.data.Dataset.from_tensor_slices(merged_examples)  # pyrefly: ignore[bad-argument-type]
 
   # Define `ShardInfo` that doesn't shard the data pipeline.
   shard_info = seqio.ShardInfo(0, 1)
@@ -1153,13 +1153,13 @@ def get_seqio_task_from_examples(
     )
 
   data_source = seqio.FunctionDataSource(
-      dataset_fn=dataset_fn, splits=["train", "validation"]
+      dataset_fn=dataset_fn, splits=["train", "validation"]  # pyrefly: ignore[bad-argument-type]
   )
 
   if add_to_registry:
     seqio.TaskRegistry.add(
         task_name,
-        data_source,
+        data_source,  # pyrefly: ignore[bad-argument-type]
         preprocessors=preprocessors,
         output_features=interactive_model._features,  # pylint: disable=protected-access
         metric_fns=metric_fns,

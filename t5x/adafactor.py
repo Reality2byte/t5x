@@ -573,7 +573,7 @@ class Adafactor(OptimizerDef):
       updates['v'] = jnp.where(jnp.isnan(updates['v']), state.v, updates['v'])
       updates['m'] = jnp.where(jnp.isnan(updates['m']), state.m, updates['m'])
       new_param = jnp.where(jnp.isnan(new_param), param, new_param)
-    new_state = _AdafactorParamState(**updates)
+    new_state = _AdafactorParamState(**updates)  # pyrefly: ignore[bad-argument-type]
 
     return new_param.astype(param.dtype), new_state
 

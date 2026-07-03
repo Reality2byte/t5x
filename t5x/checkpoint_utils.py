@@ -182,7 +182,7 @@ def detect_checkpoint_type(
   Returns:
     The checkpoint type.
   """
-  if _contains_orbax_metadata(checkpoint_path):
+  if _contains_orbax_metadata(checkpoint_path):  # pyrefly: ignore[bad-argument-type]
     checkpoint_type = CheckpointTypes.ORBAX
     _warn_if_unexpected_type(
         checkpoint_path,

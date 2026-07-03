@@ -84,7 +84,7 @@ def _cross_entropy_with_logits_fwd(
   log_z = jnp.squeeze(jnp.log(sum_exp) + max_logit, axis=-1)
   total_z_loss = z_loss * jax.lax.square(log_z)
   loss += total_z_loss
-  return (loss, total_z_loss), (
+  return (loss, total_z_loss), (  # pyrefly: ignore[bad-return]
       logits,
       targets,
       z_loss,
@@ -108,15 +108,15 @@ def _cross_entropy_with_logits_bwd(
     g: Tuple[jnp.ndarray, jnp.ndarray],
 ) -> Tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
   """Backward-mode of `cross_entropy_with_logits`."""
-  g = g[0]  # Ignore z_loss component as that is only used for logging.
+  g = g[0]  # Ignore z_loss component as that is only used for logging.  # pyrefly: ignore[bad-assignment]
   logits, targets, z_loss, exp_shifted, sum_exp, log_softmax, log_z = res
   # z-loss term adds the (2 * z_loss * log_z) factor.
   deriv = (
       jnp.expand_dims(1 + 2 * z_loss * log_z, -1) * exp_shifted / sum_exp
       - targets
   )
-  g_logits = jnp.expand_dims(g, axis=-1) * deriv
-  g_targets = -jnp.expand_dims(g, axis=-1) * log_softmax
+  g_logits = jnp.expand_dims(g, axis=-1) * deriv  # pyrefly: ignore[bad-argument-type]
+  g_targets = -jnp.expand_dims(g, axis=-1) * log_softmax  # pyrefly: ignore[bad-argument-type]
   return (
       jnp.asarray(g_logits, logits.dtype),
       jnp.asarray(g_targets, targets.dtype),
@@ -190,7 +190,7 @@ def compute_weighted_cross_entropy(
   if loss_normalizing_factor is not None:
     total_loss /= loss_normalizing_factor
     total_z_loss /= loss_normalizing_factor
-  return jnp.sum(total_loss), jnp.sum(total_z_loss), weight_sum
+  return jnp.sum(total_loss), jnp.sum(total_z_loss), weight_sum  # pyrefly: ignore[bad-return]
 
 
 @enum.unique

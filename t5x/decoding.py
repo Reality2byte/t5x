@@ -1253,7 +1253,7 @@ def beam_search(
 
     # Since we might be starting at different points in the prompts, let's use
     # the minimum prompt length to stop conservatively.
-    cur_index = state.cur_index + jnp.min(state.initial_index)
+    cur_index = state.cur_index + jnp.min(state.initial_index)  # pyrefly: ignore[bad-argument-type]
     # Because we mutate the "i+1" position, we stop one token before the end.
     not_at_end = cur_index < max_decode_len - 1
 

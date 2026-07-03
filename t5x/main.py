@@ -191,7 +191,7 @@ def main(argv: Sequence[str]):
     # User-provided gin paths take precedence if relative paths conflict.
     gin_utils.parse_gin_flags(
         _GIN_SEARCH_PATHS.value + _DEFAULT_GIN_SEARCH_PATHS,
-        _GIN_FILE.value,
+        _GIN_FILE.value,  # pyrefly: ignore[bad-argument-type]
         _GIN_BINDINGS.value,
     )
 

@@ -177,7 +177,7 @@ OptimizerDefType = OptimizerDef
 def _scale_by_schedule_ctor(state, params_axes):
   del state, params_axes
   return optax.ScaleByScheduleState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-      count=None
+      count=None  # pyrefly: ignore[bad-argument-type]
   )
 
 
@@ -201,13 +201,13 @@ class OptaxStatePartitionRules:
       # Leaf Optax States:
       amos.ScaleByAmosState: amos_helper.state_partition_rule,
       optax.AddNoiseState: lambda state, params_axes: optax.AddNoiseState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          count=None, rng_key=None
+          count=None, rng_key=None  # pyrefly: ignore[bad-argument-type]
       ),
       optax.contrib.DifferentiallyPrivateAggregateState: lambda state, params_axes: optax.contrib.DifferentiallyPrivateAggregateState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          rng_key=None
+          rng_key=None  # pyrefly: ignore[bad-argument-type]
       ),
       optax.EmaState: lambda state, params_axes: optax.EmaState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          count=None,
+          count=None,  # pyrefly: ignore[bad-argument-type]
           ema=OptaxStatePartitionRules.derive_params_axes(
               state.ema, params_axes
           ),
@@ -219,17 +219,17 @@ class OptaxStatePartitionRules:
           )
       ),
       optax.ScaleByAdamState: lambda state, params_axes: optax.ScaleByAdamState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          count=None,
+          count=None,  # pyrefly: ignore[bad-argument-type]
           mu=OptaxStatePartitionRules.derive_params_axes(state.mu, params_axes),
           nu=OptaxStatePartitionRules.derive_params_axes(state.nu, params_axes),
       ),
       optax.ScaleByBeliefState: lambda state, params_axes: optax.ScaleByBeliefState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          count=None,
+          count=None,  # pyrefly: ignore[bad-argument-type]
           mu=OptaxStatePartitionRules.derive_params_axes(state.mu, params_axes),
           nu=OptaxStatePartitionRules.derive_params_axes(state.nu, params_axes),
       ),
       optax.ScaleByLionState: lambda state, params_axes: optax.ScaleByLionState(  # pytype: disable=wrong-arg-types  # numpy-scalars
-          count=None,
+          count=None,  # pyrefly: ignore[bad-argument-type]
           mu=OptaxStatePartitionRules.derive_params_axes(state.mu, params_axes),
       ),
       optax.ScaleByRssState: lambda state, params_axes: optax.ScaleByRssState(
@@ -270,15 +270,15 @@ class OptaxStatePartitionRules:
           )
       ),
       optax.InjectHyperparamsState: lambda state, params_axes: optax.InjectHyperparamsState(  # pytype: disable=wrong-arg-types  # jax-ndarray
-          count=None,
+          count=None,  # pyrefly: ignore[bad-argument-type]
           hyperparams=jax.tree.map(lambda x: None, state.hyperparams),
           inner_state=OptaxStatePartitionRules.derive_optax_logical_axes(
               state.inner_state, params_axes
           ),
       ),
       optax.MultiStepsState: lambda state, params_axes: optax.MultiStepsState(  # pytype: disable=wrong-arg-types  # jax-ndarray
-          mini_step=None,
-          gradient_step=None,
+          mini_step=None,  # pyrefly: ignore[bad-argument-type]
+          gradient_step=None,  # pyrefly: ignore[bad-argument-type]
           inner_opt_state=OptaxStatePartitionRules.derive_optax_logical_axes(  # pylint: disable=line-too-long
               state.inner_opt_state, params_axes
           ),
@@ -298,7 +298,7 @@ class OptaxStatePartitionRules:
           inner_state=OptaxStatePartitionRules.derive_optax_logical_axes(
               state.inner_state, params_axes
           ),
-          step=None,
+          step=None,  # pyrefly: ignore[bad-argument-type]
       ),
       optax.MultiTransformState: (
           lambda state, params_axes: optax.MultiTransformState(
@@ -396,7 +396,7 @@ class OptaxWrapper(OptimizerDef):
       Initial optimizer state.
     """
     state = OptimizerState(  # pytype: disable=wrong-arg-types  # jax-ndarray
-        step=0, param_states=self.optax_optimizer.init(params)
+        step=0, param_states=self.optax_optimizer.init(params)  # pyrefly: ignore[bad-argument-type]
     )
     return state
 
