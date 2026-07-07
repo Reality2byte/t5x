@@ -124,7 +124,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
       input_vocabulary: seqio.Vocabulary,
       output_vocabulary: seqio.Vocabulary,
       optimizer_def: optimizers.OptimizerDefType,
-      decode_fn: DecodeFnCallable = calm_decoding.temperature_sample,
+      decode_fn: DecodeFnCallable = calm_decoding.temperature_sample,  # pyrefly: ignore[bad-function-definition]
       feature_converter_cls: Optional[
           Callable[..., seqio.FeatureConverter]
       ] = None,
@@ -167,7 +167,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
         input_vocabulary=input_vocabulary,
         output_vocabulary=output_vocabulary,
         optimizer_def=optimizer_def,
-        decode_fn=decode_fn,
+        decode_fn=decode_fn,  # pyrefly: ignore[bad-argument-type]
         feature_converter_cls=feature_converter_cls,
         label_smoothing=label_smoothing,
         z_loss=z_loss,
@@ -176,10 +176,10 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
 
   def get_pred_confidence(
       self,  # pytype: disable=annotation-type-mismatch  # jax-ndarray
-      logits: jnp.ndarray = None,
-      prev_state: jnp.ndarray = None,
-      new_state: jnp.ndarray = None,
-      meta_score: jnp.ndarray = None,
+      logits: jnp.ndarray = None,  # pyrefly: ignore[bad-function-definition]
+      prev_state: jnp.ndarray = None,  # pyrefly: ignore[bad-function-definition]
+      new_state: jnp.ndarray = None,  # pyrefly: ignore[bad-function-definition]
+      meta_score: jnp.ndarray = None,  # pyrefly: ignore[bad-function-definition]
   ) -> jnp.ndarray:
     """Computes the of decoder in its current prediction.
 
@@ -395,7 +395,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
     all_meta_labels_multiclass = all_meta_labels.argmax(0)
 
     # Geometric-like aggregation.
-    all_meta_scores = nn.log_softmax(all_meta_logits, axis=-1)
+    all_meta_scores = nn.log_softmax(all_meta_logits, axis=-1)  # pyrefly: ignore[bad-argument-type]
     all_meta_scores_pos = all_meta_scores[..., 1]
     all_meta_scores_neg = all_meta_scores[..., 0]
     non_stop_probs = all_meta_scores_neg.cumsum(0) - all_meta_scores_neg
@@ -418,7 +418,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
         targets=batch['decoder_target_tokens'],
         mask=weights,
         loss=loss,
-        z_loss=total_z_loss,
+        z_loss=total_z_loss,  # pyrefly: ignore[bad-argument-type]
     )
 
     # Meta metrics.
@@ -443,7 +443,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
 
     return loss, metrics
 
-  def loss_fn(
+  def loss_fn(  # pyrefly: ignore[bad-override]
       self,
       params: PyTree,
       batch: Mapping[str, jnp.ndarray],
@@ -485,7 +485,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
     all_loss, all_total_z_loss = [], []
     for logits in all_logits:
       all_loss_i, all_total_z_loss_i, _ = losses.compute_weighted_cross_entropy(
-          logits,
+          logits,  # pyrefly: ignore[bad-argument-type]
           targets=batch['decoder_target_tokens'],
           weights=weights,
           label_smoothing=self._label_smoothing,
@@ -511,7 +511,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
 
     # Based on last logits.
     metrics = self._compute_metrics(
-        logits=all_logits[-1],
+        logits=all_logits[-1],  # pyrefly: ignore[bad-argument-type]
         targets=batch['decoder_target_tokens'],
         mask=weights,
         loss=loss,
@@ -618,7 +618,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
       # Always skip the first 'exit' since previous state is missing.
       conf = 0
     else:
-      conf = self.get_pred_confidence(logits=flat_logits, meta_score=meta_score)
+      conf = self.get_pred_confidence(logits=flat_logits, meta_score=meta_score)  # pyrefly: ignore[bad-argument-type]
 
     # Used to enable a positional argument (decoder_embedded_input) for switch.
     def prt(
@@ -743,10 +743,10 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
       new_flat_cache = new_vars['cache']
 
       new_conf = self.get_pred_confidence(
-          logits=new_flat_logits,
+          logits=new_flat_logits,  # pyrefly: ignore[bad-argument-type]
           prev_state=decoder_hidden,
           new_state=new_decoder_hidden,
-          meta_score=meta_score,
+          meta_score=meta_score,  # pyrefly: ignore[bad-argument-type]
       )
 
       layer = lax.min(layer + self.exit_interval, num_layers)
@@ -847,7 +847,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
     if self.oracle_tok_noisy_cache:
       # Takes the logits of the top layer, but uses the hidden state from the
       # exited layer.
-      oracle_flat_logits = jnp.squeeze(oracle_flat_logits, axis=1)
+      oracle_flat_logits = jnp.squeeze(oracle_flat_logits, axis=1)  # pyrefly: ignore[unbound-name]
       return oracle_flat_logits, new_flat_cache, conf, layer
 
     # Remove sequence length dimension since it's always 1 during decoding.
@@ -941,7 +941,7 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
     # [el0, el1, el2] --> beamsize=2 --> [el0,el0,el1,el1,el2,el2]
     # [batch * num_decodes, input_len, emb_dim]
     encoded_inputs = decoding.flat_batch_beam_expand(
-        self.module.apply(
+        self.module.apply(  # pyrefly: ignore[bad-argument-type]
             {'params': params},
             inputs,
             enable_dropout=False,
@@ -1003,10 +1003,10 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
 
     if 'eos_id' not in decoder_params:
       decoder_params['eos_id'] = self.output_vocabulary.eos_id
-    decodes, scores = self._decode_fn(
+    decodes, scores = self._decode_fn(  # pyrefly: ignore[not-callable]
         inputs=decoder_prompt_inputs,
         cache=cache,
-        tokens_to_logits=tokens_ids_to_logits,
+        tokens_to_logits=tokens_ids_to_logits,  # pyrefly: ignore[bad-argument-type]
         num_decodes=num_decodes,
         cache_offset=1 if scanned else 0,
         **decoder_params,
@@ -1030,6 +1030,6 @@ class EncoderDecoderModel(models.EncoderDecoderModel):
     else:
       return decodes[:, -1, :], {
           'scores': scores[:, -1],
-          'exits': exits[:, -1, :],
-          'confidences': confidences[:, -1, :],
+          'exits': exits[:, -1, :],  # pyrefly: ignore[bad-index]
+          'confidences': confidences[:, -1, :],  # pyrefly: ignore[bad-index]
       }

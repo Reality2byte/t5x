@@ -55,7 +55,7 @@ class MoeEncoderDecoderModel(base_models.EncoderDecoderModel):
       input_vocabulary: seqio.Vocabulary,
       output_vocabulary: seqio.Vocabulary,
       optimizer_def: optimizers.OptimizerDefType,
-      decode_fn: DecodeFnCallable = decoding.beam_search,
+      decode_fn: DecodeFnCallable = decoding.beam_search,  # pyrefly: ignore[bad-function-definition]
       feature_converter_cls: Optional[
           Callable[..., seqio.FeatureConverter]
       ] = None,
@@ -107,7 +107,7 @@ class MoeEncoderDecoderModel(base_models.EncoderDecoderModel):
         state,
         self._label_smoothing,
         self._z_loss,
-        self._loss_normalizing_factor,
+        self._loss_normalizing_factor,  # pyrefly: ignore[bad-argument-type]
         self._aux_loss_factor,
         self._router_z_loss_factor,
     )
@@ -159,7 +159,7 @@ class MoeDecoderOnlyModel(base_models.DecoderOnlyModel):
       module: nn.Module,
       vocabulary: seqio.Vocabulary,
       optimizer_def: optimizers.OptimizerDefType,
-      decode_fn: DecodeFnCallable = decoding.temperature_sample,
+      decode_fn: DecodeFnCallable = decoding.temperature_sample,  # pyrefly: ignore[bad-function-definition]
       inputs_bidirectional_attention: bool = False,
       feature_converter_cls: Optional[
           Callable[..., seqio.FeatureConverter]
@@ -212,7 +212,7 @@ class MoeDecoderOnlyModel(base_models.DecoderOnlyModel):
         state,
         self._label_smoothing,
         self._z_loss,
-        self._loss_normalizing_factor,
+        self._loss_normalizing_factor,  # pyrefly: ignore[bad-argument-type]
         self._aux_loss_factor,
         self._router_z_loss_factor,
     )
@@ -275,7 +275,7 @@ def _moe_loss_fn(
   )
 
   targets = batch['decoder_target_tokens']
-  total_loss, z_loss, _ = losses.compute_weighted_cross_entropy(
+  total_loss, z_loss, _ = losses.compute_weighted_cross_entropy(  # pyrefly: ignore[bad-assignment]
       logits,
       targets=targets,
       weights=weights,
@@ -297,12 +297,12 @@ def _moe_loss_fn(
       targets=targets,
       mask=weights,
       loss=total_loss,
-      z_loss=z_loss,
+      z_loss=z_loss,  # pyrefly: ignore[bad-argument-type]
   )
   metrics.update(
       _expert_metrics(  # pytype: disable=wrong-arg-types  # jax-ndarray
           diversity_metrics,
-          total_loss,
+          total_loss,  # pyrefly: ignore[bad-argument-type]
           z_loss,
           aux_loss,
           router_z_loss,
@@ -420,6 +420,6 @@ def _expert_metrics(
       # accounts for MoE losses.
       'cross_ent_loss': metrics_lib.AveragePerStep(total=cross_ent_loss),
       'cross_ent_loss_per_all_target_tokens': clu_metrics.Average(  # pytype: disable=wrong-arg-types  # jnp-array
-          total=jnp.sum(cross_ent_loss), count=num_tokens
+          total=jnp.sum(cross_ent_loss), count=num_tokens  # pyrefly: ignore[bad-argument-type]
       ),
   }

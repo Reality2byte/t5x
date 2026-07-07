@@ -120,7 +120,7 @@ def dot_product_attention(
     # corresponds to in positional dimensions here, assuming query dim.
     dropout_shape = list(attn_weights.shape)
     dropout_shape[-2] = 1
-    keep = random.bernoulli(dropout_rng, keep_prob, dropout_shape)
+    keep = random.bernoulli(dropout_rng, keep_prob, dropout_shape)  # pyrefly: ignore[bad-argument-type]
     keep = jnp.broadcast_to(keep, attn_weights.shape)
     multiplier = keep.astype(attn_weights.dtype) / jnp.asarray(
         keep_prob, dtype=dtype
@@ -432,7 +432,7 @@ class MultiHeadDotProductAttention(nn.Module):
             # dim (because this is always set to one), and the first query
             # vector. If there is any prefix at all, the first element in the
             # prefix would be part of it.
-            prefill_lengths = jnp.sum(mask[:, 0, 0, :], axis=-1).astype(
+            prefill_lengths = jnp.sum(mask[:, 0, 0, :], axis=-1).astype(  # pyrefly: ignore[unsupported-operation]
                 cache_index.value.dtype
             )
           (
@@ -516,9 +516,9 @@ class MultiHeadDotProductAttention(nn.Module):
         # TODO(brianlester,levskaya): Move variable assignment inside of the
         # cache update functions once variable references are tracked across
         # transform boundaries.
-        cache_index.value = cache_index_value
-        cached_key.value = cached_key_value
-        cached_value.value = cached_value_value
+        cache_index.value = cache_index_value  # pyrefly: ignore[unbound-name]
+        cached_key.value = cached_key_value  # pyrefly: ignore[unbound-name]
+        cached_value.value = cached_value_value  # pyrefly: ignore[unbound-name]
 
     # Convert the boolean attention mask to an attention bias.
     if mask is not None:
@@ -566,7 +566,7 @@ class MultiHeadDotProductAttention(nn.Module):
 
 def _normalize_axes(axes: Iterable[int], ndim: int) -> Tuple[int]:
   # A tuple by convention. len(axes_tuple) then also gives the rank efficiently.
-  return tuple([ax if ax >= 0 else ndim + ax for ax in axes])
+  return tuple([ax if ax >= 0 else ndim + ax for ax in axes])  # pyrefly: ignore[bad-return]
 
 
 def _canonicalize_tuple(x):
@@ -1041,16 +1041,16 @@ def combine_masks(*masks: Optional[Array], dtype: DType = jnp.float32):
   Returns:
     Combined mask, reduced by logical and, returns None if no masks given.
   """
-  masks = [m for m in masks if m is not None]
+  masks = [m for m in masks if m is not None]  # pyrefly: ignore[bad-assignment]
   if not masks:
     return None
   assert all(
-      map(lambda x: x.ndim == masks[0].ndim, masks)
+      map(lambda x: x.ndim == masks[0].ndim, masks)  # pyrefly: ignore[missing-attribute]
   ), f'masks must have same rank: {tuple(map(lambda x: x.ndim, masks))}'
   mask, *other_masks = masks
   for other_mask in other_masks:
-    mask = jnp.logical_and(mask, other_mask)
-  return mask.astype(dtype)
+    mask = jnp.logical_and(mask, other_mask)  # pyrefly: ignore[bad-argument-type]
+  return mask.astype(dtype)  # pyrefly: ignore[missing-attribute]
 
 
 def combine_biases(*masks: Optional[Array]):
@@ -1062,15 +1062,15 @@ def combine_biases(*masks: Optional[Array]):
   Returns:
     Combined mask, reduced by summation, returns None if no masks given.
   """
-  masks = [m for m in masks if m is not None]
+  masks = [m for m in masks if m is not None]  # pyrefly: ignore[bad-assignment]
   if not masks:
     return None
   assert all(
-      map(lambda x: x.ndim == masks[0].ndim, masks)
+      map(lambda x: x.ndim == masks[0].ndim, masks)  # pyrefly: ignore[missing-attribute]
   ), f'masks must have same rank: {tuple(map(lambda x: x.ndim, masks))}'
   mask, *other_masks = masks
   for other_mask in other_masks:
-    mask = mask + other_mask
+    mask = mask + other_mask  # pyrefly: ignore[unsupported-operation]
   return mask
 
 

@@ -218,7 +218,7 @@ class Decoder(nn.Module):
           deterministic=deterministic,
           decode=decode,
           max_decode_length=max_decode_length,
-          prefill=prefill,
+          prefill=prefill,  # pyrefly: ignore[bad-argument-type]
           prefill_lengths=prefill_lengths,
       )
 

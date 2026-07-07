@@ -93,7 +93,7 @@ def default_moe_mesh(
   # Base mesh has shape ('data', 'model').
   logging.info('For MoE, first construct vanilla T5X (data, model) mesh.')
   base_default_mesh = base_partitioning.default_mesh(
-      num_partitions, model_parallel_submesh, backend
+      num_partitions, model_parallel_submesh, backend  # pyrefly: ignore[bad-argument-type]
   )
   data_axis_size, model_axis_size = base_default_mesh.devices.shape
 
@@ -458,7 +458,7 @@ def compute_num_model_partitions(
       )
     return num_model_partitions
   else:
-    return np.prod(model_parallel_submesh)
+    return np.prod(model_parallel_submesh)  # pyrefly: ignore[no-matching-overload]
 
 
 def override_partition_specs(resources: Pytree):

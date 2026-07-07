@@ -55,7 +55,7 @@ class UpcycleCheckpointer(checkpoints.Checkpointer):
       ] = None,
       *,
       keep: Optional[int] = None,
-      save_dtype: jnp.dtype = np.float32,
+      save_dtype: jnp.dtype = np.float32,  # pyrefly: ignore[bad-function-definition]
       restore_dtype: Optional[jnp.dtype] = None,
       keep_dataset_checkpoints: Optional[int] = None,
   ):
@@ -162,7 +162,7 @@ class UpcycleCheckpointer(checkpoints.Checkpointer):
       return arr
 
     return LazyAwaitableArray.from_tensor_store_spec_or_array(
-        maybe_ts_spec, get_fn, dtype=restore_dtype
+        maybe_ts_spec, get_fn, dtype=restore_dtype  # pyrefly: ignore[bad-argument-type]
     )
 
 
@@ -240,7 +240,7 @@ async def _read_upcycle_ts(
     ts_spec_arr_shape = tuple(tmp_ts_spec_dict['metadata']['shape'])
     # Check that the shapes of the array on disk match the expected shape based
     # on the optimizer that is being restored.
-    if (not m_or_v) and is_expert_param:
+    if (not m_or_v) and is_expert_param:  # pyrefly: ignore[unbound-name]
       shapes_match = ts_spec_arr_shape == param_info.shape[1:]
     else:
       shapes_match = ts_spec_arr_shape == param_info.shape
@@ -313,7 +313,7 @@ async def _read_upcycle_ts(
         upcycled_axes = axes
         arr = pjit(
             upcycle,
-            in_shardings=checkpoint_axes,
+            in_shardings=checkpoint_axes,  # pyrefly: ignore[unbound-name]
             out_shardings=upcycled_axes,
         )(arr)
 

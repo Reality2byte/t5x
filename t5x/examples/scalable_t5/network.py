@@ -487,7 +487,7 @@ class Transformer(nn.Module):
       encoder_decoder_mask = layers.combine_masks(
           encoder_decoder_mask,
           layers.make_attention_mask(
-              decoder_segment_ids,
+              decoder_segment_ids,  # pyrefly: ignore[bad-argument-type]
               encoder_segment_ids,
               jnp.equal,
               dtype=cfg.dtype,
