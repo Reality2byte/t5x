@@ -394,7 +394,7 @@ def standard_logical_axis_rules(
   _ = base_partitioning.global_mesh_defined()
 
   if parameter_partitioning_dims == 2:
-    raise logging.warning(
+    raise logging.warning(  # pyrefly: ignore[bad-raise]
         '2D parameter sharding (`parameter_partitioning_dims=2`) is supported '
         'but untested for MoE.'
     )
